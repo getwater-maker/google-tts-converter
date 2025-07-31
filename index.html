@@ -256,6 +256,7 @@
 
         /* 새로 추가될 텍스트 분할 영역 스타일 */
         #original-text-section {
+            margin-top: 30px; /* 탭 아래 공간 확보 */
             margin-bottom: 30px;
             padding: 20px;
             background-color: #f9f9f9;
@@ -362,7 +363,7 @@
                 <div class="main-header">
                     <h1>구글 TTS 한국어 변환기 (대본 분할 및 고품질 음성)</h1>
                     <p class="app-description" style="margin-top: 8px;">
-                        구글의 Text-to-Speech API를 활용하여 텍스트를 자연스러운 한국어 음성으로 변환해보세요. 긴 대본도 자동으로 분할하여 변환합니다.
+                        구글의 Text-to-Speech API를 활용하여 텍스트를 자연스러운 한국어 음성으로 변환해보세요.
                     </p>
                 </div>
 
@@ -383,11 +384,73 @@
                     </div>
                 </div>
 
+                <div class="tabs">
+                    <div class="tab active" data-tab="general-text">일반 텍스트</div>
+                    <div class="tab" data-tab="ssml-text">SSML</div>
+                    <div class="tab" data-tab="history">변환 기록</div>
+                </div>
+
+                <div class="tab-content active" id="general-text-tab">
+                    <div class="form-group">
+                        <label for="general-text-input">텍스트 입력</label>
+                        <textarea id="general-text-input" placeholder="음성으로 변환할 텍스트를 입력하세요..."></textarea>
+                        <div class="char-counter-display" id="general-text-input-counter">
+                            글자 수: 0 | 바이트 수: 0
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button id="general-convert-btn" class="btn-primary">음성으로 변환</button>
+                        <button id="general-download-btn" class="btn-secondary" disabled>MP3 다운로드</button>
+                    </div>
+                    <div id="general-status" class="status"></div>
+                    <audio id="general-audio-player" controls></audio>
+                </div>
+
+                <div class="tab-content" id="ssml-text-tab">
+                    <div class="form-group">
+                        <label for="ssml-input">SSML 입력</label>
+                        <div class="ssml-tags">
+                            <div class="ssml-tag" data-tag="break" data-value="time='500ms'">break (쉼표)</div>
+                            <div class="ssml-tag" data-tag="emphasis" data-value="level='strong'">emphasis (강조)</div>
+                            <div class="ssml-tag" data-tag="say-as" data-value="interpret-as='date' format='ymd'">say-as (날짜)</div>
+                            <div class="ssml-tag" data-tag="say-as" data-value="interpret-as='time'">say-as (시간)</div>
+                            <div class="ssml-tag" data-tag="say-as" data-value="interpret-as='telephone'">say-as (전화번호)</div>
+                            <div class="ssml-tag" data-tag="prosody" data-value="rate='slow'">prosody (속도)</div>
+                            <div class="ssml-tag" data-tag="prosody" data-value="pitch='high'">prosody (높이)</div>
+                            <div class="ssml-tag" data-tag="prosody" data-value="volume='loud'">prosody (볼륨)</div>
+                        </div>
+                        <textarea id="ssml-input" placeholder="<speak>SSML 태그를 사용하여 음성을 더 세밀하게 조절하세요...</speak>"><speak>안녕하세요, SSML 태그를 사용해 보세요.</speak></textarea>
+                        <div class="char-counter-display" id="ssml-input-counter">
+                            글자 수: 0 | 바이트 수: 0
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button id="ssml-convert-btn" class="btn-primary">음성으로 변환</button>
+                        <button id="ssml-download-btn" class="btn-secondary" disabled>MP3 다운로드</button>
+                    </div>
+                    <div id="ssml-status" class="status"></div>
+                    <audio id="ssml-audio-player" controls></audio>
+                </div>
+
+                <div class="tab-content" id="history-tab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                        <h2 style="margin:0;">변환 기록</h2>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label for="max-history-input" style="font-size: 13px; color: var(--dark-text); white-space: nowrap;">최대 기록 수:</label>
+                            <input type="number" id="max-history-input" min="5" max="50" value="15" style="width: 60px; font-size: 13px; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 4px;">
+                            <button id="clear-history-btn" class="btn-accent">기록 전체 삭제</button>
+                        </div>
+                    </div>
+                    <ul id="history-list">
+                    </ul>
+                    <p id="no-history-message" style="display: none; color: var(--light-text); text-align: center; padding: 20px 0;">변환 기록이 없습니다.</p>
+                </div>
+
                 <div id="original-text-section">
-                    <h2>긴 대본 입력</h2>
+                    <h2>긴 대본 입력 (자동 분할)</h2>
                     <div class="form-group">
                         <label for="original-transcript">전체 대본을 입력하세요 (문장 단위로 자동 분할됩니다)</label>
-                        <textarea id="original-transcript" placeholder="유튜브 영상의 대본 전체를 여기에 붙여넣으세요..."></textarea>
+                        <textarea id="original-transcript" placeholder="유튜브 영상의 긴 대본 전체를 여기에 붙여넣으세요..."></textarea>
                         <div class="char-counter-display" id="original-transcript-counter">
                             글자 수: 0 | 바이트 수: 0
                         </div>
@@ -398,7 +461,7 @@
                 <div id="segmented-texts-container">
                     <h2>분할된 텍스트 청크 (&lt;5000 바이트)</h2>
                     <p id="no-segments-message" style="color: var(--light-text); margin-top: 15px;">
-                        '대본 분할 및 준비' 버튼을 눌러 대본을 분할하세요.
+                        '긴 대본 입력' 섹션에서 '대본 분할 및 준비' 버튼을 눌러 대본을 분할하세요.
                     </p>
                     </div>
 
@@ -453,7 +516,7 @@
                         <div class="footer-card">
                             <h4>알랑가IT꿀팁 (구글 텍스트투스피치 음성변환툴)</h4>
                             <p>음성변환툴 - 새로운 기능이 추가되었는지 확인해보세요.</p>
-                            <p style="margin-top: 10px; font-size: 0.8em;"><a href="https://www.youtube.com/channel/YOUR_CHANNEL_ID_HERE" target="_blank" style="color: var(--primary-color); text-decoration: none;">유튜브 채널 바로가기</a></p>
+                            <p style="margin-top: 10px; font-size: 0.8em;"><a href="https://www.youtube.com/@YOUR_CHANNEL_ID_HERE" target="_blank" style="color: var(--primary-color); text-decoration: none;">유튜브 채널 바로가기</a></p>
                         </div>
                         <div class="footer-card">
                             <h4>음성 피치 & 속도 조절기</h4>
@@ -471,9 +534,487 @@
         // 기존 synthesizeSpeech_local 함수 (변경 없음)
         async function synthesizeSpeech_local(_0x3510d9,_0x11db89){const _0x1553d3=a0_0x34c5,{textToConvert:_0x185084,inputType:_0x175e7d,voice:_0x110719,rate:_0x6cc6f1,pitch:_0x35bc1f,volumeGainDb:_0x2b41fb,isChirpModel:_0x78887a}=_0x11db89;let _0x49336f={};if(_0x175e7d===_0x1553d3(0x1f5)){if(!_0x185084)return{'error':_0x1553d3(0x1f2)};_0x49336f[_0x1553d3(0x1f5)]=_0x185084;}else{if(_0x175e7d===_0x1553d3(0x1ee)){if(!_0x185084)return{'error':_0x1553d3(0x1f4)};if(!_0x185084[_0x1553d3(0x1ed)]('<speak>')||!_0x185084[_0x1553d3(0x1f6)](_0x1553d3(0x20b)))return{'error':_0x1553d3(0x1fd)};_0x49336f[_0x1553d3(0x1ee)]=_0x185084;}else return{'error':'알\\x20수\\x20없는\\x20입력\\x20타입입니다.'};}const _0x39fd65=_0x78887a?_0x1553d3(0x1fb):'v1',_0x27c93b='https://texttospeech.googleapis.com/'+_0x39fd65+_0x1553d3(0x208)+_0x3510d9,_0xc278e2={'input':_0x49336f,'voice':{'languageCode':_0x1553d3(0x1f0),'name':_0x110719},'audioConfig':{'audioEncoding':'MP3','speakingRate':_0x6cc6f1,'volumeGainDb':_0x2b41fb}};!_0x78887a&&_0xc278e2[_0x1553d3(0x1f7)]&&(_0xc278e2[_0x1553d3(0x1f7)][_0x1553d3(0x1fe)]=_0x35bc1f);try{const _0x43200b=await fetch(_0x27c93b,{'method':'POST','headers':{'Content-Type':'application/json'},'body':JSON[_0x1553d3(0x1ef)](_0xc278e2)}),_0x8012ed=await _0x43200b['json']();if(!_0x43200b['ok']){const _0x52579b=_0x8012ed[_0x1553d3(0x203)]&&_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]?_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]:_0x1553d3(0x1f1);return console[_0x1553d3(0x203)](_0x1553d3(0x1f8),_0x8012ed),{'error':_0x1553d3(0x1f9)+_0x52579b+'\\x20(코드:\\x20'+_0x43200b['status']+')','details':_0x8012ed};}if(!_0x8012ed[_0x1553d3(0x201)])return{'error':_0x1553d3(0x1ff)};return{'audioContent':_0x8012ed[_0x1553d3(0x201)]};}catch(_0xfd9d59){return console['error'](_0x1553d3(0x1ec),_0xfd9d59),{'error':_0x1553d3(0x206)+_0xfd9d59[_0x1553d3(0x209)]};}}
 
-        // 기존 난독화된 유틸리티 함수들
+        // 기존 난독화된 유틸리티 함수들 (코드 유지)
         (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqGqvbjioYALoYYRsdSI6tTJkG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNjVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMoQWGcdRSjZSG53TLOJSIRxRI4JRI6qU','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
+
+        // 새롭게 추가된 UI 관리 및 기능 로직
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiKeyInput = document.getElementById('api-key');
+            const toggleApiKeyVisibilityBtn = document.getElementById('toggle-api-key-visibility');
+
+            // API 키 로드 및 저장
+            const savedApiKey = localStorage.getItem('googleTTSApiKey');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+
+            apiKeyInput.addEventListener('input', () => {
+                localStorage.setItem('googleTTSApiKey', apiKeyInput.value);
+            });
+
+            toggleApiKeyVisibilityBtn.addEventListener('click', () => {
+                if (apiKeyInput.type === 'password') {
+                    apiKeyInput.type = 'text';
+                    toggleApiKeyVisibilityBtn.textContent = '●'; // 채워진 원
+                } else {
+                    apiKeyInput.type = 'password';
+                    toggleApiKeyVisibilityBtn.textContent = '◉'; // 비워진 원
+                }
+            });
+
+            // --- 탭 기능 ---
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tabContents.forEach(item => item.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const targetTab = tab.dataset.tab;
+                    document.getElementById(`${targetTab}-tab`).classList.add('active');
+                    
+                    // 기록 탭 활성화 시 기록 로드
+                    if (targetTab === 'history') {
+                        loadHistory();
+                    }
+                });
+            });
+
+            // --- 문자/바이트 카운터 ---
+            function updateCharByteCounter(textareaId, counterId) {
+                const textarea = document.getElementById(textareaId);
+                const counter = document.getElementById(counterId);
+                if (textarea && counter) {
+                    textarea.addEventListener('input', () => {
+                        const text = textarea.value;
+                        const charCount = text.length;
+                        const byteCount = new TextEncoder().encode(text).length;
+                        counter.textContent = `글자 수: ${charCount} | 바이트 수: ${byteCount}`;
+                    });
+                     // 초기 로드시 한번 업데이트
+                    const initialText = textarea.value;
+                    const initialCharCount = initialText.length;
+                    const initialByteCount = new TextEncoder().encode(initialText).length;
+                    counter.textContent = `글자 수: ${initialCharCount} | 바이트 수: ${initialByteCount}`;
+                }
+            }
+
+            updateCharByteCounter('general-text-input', 'general-text-input-counter');
+            updateCharByteCounter('ssml-input', 'ssml-input-counter');
+            updateCharByteCounter('original-transcript', 'original-transcript-counter');
+
+            // --- SSML 태그 삽입 ---
+            document.querySelectorAll('.ssml-tag').forEach(tagButton => {
+                tagButton.addEventListener('click', () => {
+                    const ssmlInput = document.getElementById('ssml-input');
+                    const tag = tagButton.dataset.tag;
+                    const value = tagButton.dataset.value;
+                    let tagText = '';
+
+                    switch (tag) {
+                        case 'break':
+                            tagText = `<break ${value}/>`;
+                            break;
+                        case 'emphasis':
+                        case 'prosody':
+                        case 'say-as':
+                            // 예시: <emphasis level="strong"></emphasis>
+                            // <prosody rate="slow"></prosody>
+                            // <say-as interpret-as="date" format="ymd"></say-as>
+                            tagText = `<${tag} ${value}></${tag}>`;
+                            break;
+                        default:
+                            tagText = `<${tag}></${tag}>`;
+                    }
+
+                    const start = ssmlInput.selectionStart;
+                    const end = ssmlInput.selectionEnd;
+                    const text = ssmlInput.value;
+                    
+                    if (tag === 'break') {
+                        // break 태그는 항상 빈 태그이므로 선택 영역 무시
+                        ssmlInput.value = text.substring(0, start) + tagText + text.substring(end);
+                        ssmlInput.selectionStart = ssmlInput.selectionEnd = start + tagText.length;
+                    } else {
+                        // 다른 태그는 선택 영역을 감싸거나, 커서 위치에 삽입
+                        const selectedText = text.substring(start, end);
+                        if (selectedText) {
+                            tagText = `<${tag} ${value || ''}>${selectedText}</${tag}>`;
+                            ssmlInput.value = text.substring(0, start) + tagText + text.substring(end);
+                            ssmlInput.selectionStart = start;
+                            ssmlInput.selectionEnd = start + tagText.length;
+                        } else {
+                            const openingTag = `<${tag} ${value || ''}>`;
+                            const closingTag = `</${tag}>`;
+                            ssmlInput.value = text.substring(0, start) + openingTag + closingTag + text.substring(end);
+                            ssmlInput.selectionStart = ssmlInput.selectionEnd = start + openingTag.length;
+                        }
+                    }
+                    ssmlInput.dispatchEvent(new Event('input')); // 카운터 업데이트
+                });
+            });
+
+            // --- 음성 설정 슬라이더 값 표시 ---
+            const rateSlider = document.getElementById('rate-slider');
+            const rateValue = document.getElementById('rate-value');
+            const pitchSlider = document.getElementById('pitch-slider');
+            const pitchValue = document.getElementById('pitch-value');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeValue = document.getElementById('volume-value');
+
+            rateSlider.addEventListener('input', () => rateValue.textContent = parseFloat(rateSlider.value).toFixed(2));
+            pitchSlider.addEventListener('input', () => pitchValue.textContent = parseInt(pitchSlider.value));
+            volumeSlider.addEventListener('input', () => volumeValue.textContent = parseInt(volumeSlider.value));
+
+
+            // --- 변환 기록 관리 ---
+            const historyList = document.getElementById('history-list');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const maxHistoryInput = document.getElementById('max-history-input');
+            const noHistoryMessage = document.getElementById('no-history-message');
+
+            let history = JSON.parse(localStorage.getItem('ttsHistory')) || [];
+
+            function saveHistory() {
+                localStorage.setItem('ttsHistory', JSON.stringify(history));
+                loadHistory(); // 기록 저장 후 새로고침
+            }
+
+            function loadHistory() {
+                history = JSON.parse(localStorage.getItem('ttsHistory')) || [];
+                historyList.innerHTML = '';
+                if (history.length === 0) {
+                    noHistoryMessage.style.display = 'block';
+                    return;
+                }
+                noHistoryMessage.style.display = 'none';
+
+                // 최근 기록부터 표시
+                const displayHistory = history.slice(0, parseInt(maxHistoryInput.value));
+
+                displayHistory.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.style.cssText = `
+                        background-color: var(--background-color);
+                        border: 1px solid var(--border-color);
+                        border-radius: 8px;
+                        padding: 15px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 2px 4px var(--shadow-light);
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    `;
+                    
+                    const textDisplay = document.createElement('p');
+                    textDisplay.innerHTML = `<strong>텍스트:</strong> ${item.text.length > 100 ? item.text.substring(0, 100) + '...' : item.text}`;
+                    textDisplay.style.fontSize = '0.95em';
+                    textDisplay.style.color = 'var(--dark-text)';
+
+                    const infoDisplay = document.createElement('p');
+                    infoDisplay.innerHTML = `
+                        <strong>음성:</strong> ${item.voiceName} | 
+                        <strong>속도:</strong> ${item.rate} | 
+                        <strong>높이:</strong> ${item.pitch} | 
+                        <strong>볼륨:</strong> ${item.volumeGainDb} |
+                        <strong>날짜:</strong> ${new Date(item.timestamp).toLocaleString()}
+                    `;
+                    infoDisplay.style.fontSize = '0.85em';
+                    infoDisplay.style.color = 'var(--light-text)';
+
+                    const audioPlayer = document.createElement('audio');
+                    audioPlayer.controls = true;
+                    const blob = base64ToBlob_local(item.audioContent, 'audio/mpeg');
+                    audioPlayer.src = URL.createObjectURL(blob);
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = `${item.fileName}.mp3`;
+                    downloadLink.textContent = 'MP3 다운로드';
+                    downloadLink.classList.add('btn-secondary');
+                    downloadLink.style.marginRight = '10px';
+                    downloadLink.style.padding = '8px 15px';
+                    downloadLink.style.fontSize = '0.85em';
+                    downloadLink.style.display = 'inline-block';
+                    downloadLink.style.marginTop = '5px';
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '삭제';
+                    deleteBtn.classList.add('btn-accent');
+                    deleteBtn.style.padding = '8px 15px';
+                    deleteBtn.style.fontSize = '0.85em';
+                    deleteBtn.style.display = 'inline-block';
+                    deleteBtn.style.marginTop = '5px';
+                    deleteBtn.addEventListener('click', () => {
+                        history.splice(history.indexOf(item), 1); // 해당 아이템 제거
+                        saveHistory();
+                    });
+
+                    listItem.appendChild(textDisplay);
+                    listItem.appendChild(infoDisplay);
+                    listItem.appendChild(audioPlayer);
+                    listItem.appendChild(downloadLink);
+                    listItem.appendChild(deleteBtn);
+                    historyList.appendChild(listItem);
+                });
+            }
+
+            clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('모든 변환 기록을 삭제하시겠습니까?')) {
+                    history = [];
+                    saveHistory();
+                }
+            });
+
+            maxHistoryInput.addEventListener('change', loadHistory);
+
+
+            // --- 음성 변환 공통 함수 ---
+            async function commonConvertAndDownload(textToConvert, inputType, statusElement, audioPlayerElement, downloadButtonElement, filenamePrefix) {
+                const apiKey = apiKeyInput.value;
+                if (!apiKey) {
+                    statusElement.textContent = '오류: 구글 TTS API 키를 입력해주세요.';
+                    statusElement.style.color = 'red';
+                    return;
+                }
+                
+                statusElement.textContent = '음성 변환 중...';
+                statusElement.style.color = 'orange';
+                downloadButtonElement.disabled = true;
+
+                const voiceSelect = document.getElementById('voice-select');
+                const voiceName = voiceSelect.value;
+                const rate = parseFloat(rateSlider.value);
+                const pitch = parseInt(pitchSlider.value);
+                const volumeGainDb = parseInt(volumeSlider.value);
+                
+                // Chirp 모델 확인 (ko-KR-Chirp3-HD- 로 시작하는지)
+                const isChirpModel = voiceName.startsWith('ko-KR-Chirp3-HD-');
+
+                try {
+                    const response = await synthesizeSpeech_local(apiKey, {
+                        textToConvert: textToConvert,
+                        inputType: inputType,
+                        voice: voiceName,
+                        rate: rate,
+                        pitch: pitch,
+                        volumeGainDb: volumeGainDb,
+                        isChirpModel: isChirpModel
+                    });
+
+                    if (response.error) {
+                        statusElement.textContent = `오류: ${response.error}`;
+                        statusElement.style.color = 'red';
+                        console.error('TTS API Error:', response.details || response.error);
+                    } else if (response.audioContent) {
+                        const audioBlob = base64ToBlob_local(response.audioContent, 'audio/mpeg');
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayerElement.src = audioUrl;
+                        audioPlayerElement.load();
+                        audioPlayerElement.play();
+
+                        statusElement.textContent = '음성 변환 완료!';
+                        statusElement.style.color = 'green';
+                        downloadButtonElement.disabled = false;
+
+                        // 파일 이름 생성 (날짜 및 시간 추가)
+                        const now = new Date();
+                        const fileName = `${filenamePrefix}_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                        downloadButtonElement.onclick = () => {
+                            const a = document.createElement('a');
+                            a.href = audioUrl;
+                            a.download = `${fileName}.mp3`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        };
+
+                        // 기록 저장 (긴 대본은 개별 세그먼트만 저장)
+                        if (filenamePrefix.startsWith('변환된_청크')) {
+                           // 긴 대본 청크는 별도로 기록에 추가하지 않음 (너무 많아짐)
+                           // 필요하다면 여기에 특정 로직 추가 가능
+                        } else {
+                            history.unshift({ // 최신 기록을 맨 앞에 추가
+                                text: textToConvert,
+                                inputType: inputType,
+                                voiceName: voiceName,
+                                rate: rate,
+                                pitch: pitch,
+                                volumeGainDb: volumeGainDb,
+                                audioContent: response.audioContent, // base64 인코딩된 오디오 데이터 저장
+                                fileName: fileName,
+                                timestamp: Date.now()
+                            });
+                            // 최대 기록 수 제한
+                            history = history.slice(0, parseInt(maxHistoryInput.value));
+                            saveHistory();
+                        }
+
+                    } else {
+                        statusElement.textContent = '오류: 오디오 콘텐츠를 받아오지 못했습니다.';
+                        statusElement.style.color = 'red';
+                    }
+                } catch (error) {
+                    statusElement.textContent = `네트워크 오류: ${error.message}`;
+                    statusElement.style.color = 'red';
+                    console.error('Network or unknown error:', error);
+                }
+            }
+
+            // --- 일반 텍스트 탭 이벤트 리스너 ---
+            const generalTextInput = document.getElementById('general-text-input');
+            const generalConvertBtn = document.getElementById('general-convert-btn');
+            const generalDownloadBtn = document.getElementById('general-download-btn');
+            const generalStatus = document.getElementById('general-status');
+            const generalAudioPlayer = document.getElementById('general-audio-player');
+
+            generalConvertBtn.addEventListener('click', () => {
+                commonConvertAndDownload(
+                    generalTextInput.value, 
+                    'text', 
+                    generalStatus, 
+                    generalAudioPlayer, 
+                    generalDownloadBtn, 
+                    '일반텍스트_변환'
+                );
+            });
+
+            // --- SSML 탭 이벤트 리스너 ---
+            const ssmlInput = document.getElementById('ssml-input');
+            const ssmlConvertBtn = document.getElementById('ssml-convert-btn');
+            const ssmlDownloadBtn = document.getElementById('ssml-download-btn');
+            const ssmlStatus = document.getElementById('ssml-status');
+            const ssmlAudioPlayer = document.getElementById('ssml-audio-player');
+
+            ssmlConvertBtn.addEventListener('click', () => {
+                commonConvertAndDownload(
+                    ssmlInput.value, 
+                    'ssml', 
+                    ssmlStatus, 
+                    ssmlAudioPlayer, 
+                    ssmlDownloadBtn, 
+                    'SSML_변환'
+                );
+            });
+
+
+            // --- 긴 대본 처리 기능 ---
+            const originalTranscriptInput = document.getElementById('original-transcript');
+            const processTranscriptBtn = document.getElementById('process-transcript-btn');
+            const segmentedTextsContainer = document.getElementById('segmented-texts-container');
+            const noSegmentsMessage = document.getElementById('no-segments-message');
+
+            const MAX_BYTE_SIZE = 4900; // Google API 제한 5000 바이트보다 약간 작게 설정
+
+            function getByteLength(str) {
+                return new TextEncoder().encode(str).length;
+            }
+
+            function splitTextIntoChunks(text) {
+                const sentences = text.match(/[^.!?。？！]+[.!?。？！]?/g) || [text];
+                const chunks = [];
+                let currentChunk = '';
+                let currentChunkByteLength = 0;
+
+                sentences.forEach(sentence => {
+                    const sentenceByteLength = getByteLength(sentence);
+
+                    if (sentenceByteLength > MAX_BYTE_SIZE) {
+                        // 문장 자체가 너무 길 경우, 강제 분할 (워드 단위로 시도)
+                        let tempSentence = sentence;
+                        while (getByteLength(tempSentence) > MAX_BYTE_SIZE) {
+                            let splitPoint = tempSentence.substring(0, MAX_BYTE_SIZE).lastIndexOf(' ');
+                            if (splitPoint === -1 || splitPoint === 0) {
+                                // 공백이 없거나 첫 글자라면, 강제 분할
+                                splitPoint = MAX_BYTE_SIZE;
+                            }
+                            const part = tempSentence.substring(0, splitPoint);
+                            chunks.push(part.trim());
+                            tempSentence = tempSentence.substring(splitPoint).trim();
+                        }
+                        if (tempSentence.length > 0) {
+                            chunks.push(tempSentence.trim());
+                        }
+                    } else {
+                        if (currentChunkByteLength + sentenceByteLength <= MAX_BYTE_SIZE) {
+                            currentChunk += sentence;
+                            currentChunkByteLength += sentenceByteLength;
+                        } else {
+                            chunks.push(currentChunk.trim());
+                            currentChunk = sentence;
+                            currentChunkByteLength = sentenceByteLength;
+                        }
+                    }
+                });
+
+                if (currentChunk.length > 0) {
+                    chunks.push(currentChunk.trim());
+                }
+                return chunks;
+            }
+
+            processTranscriptBtn.addEventListener('click', () => {
+                const originalText = originalTranscriptInput.value.trim();
+                if (!originalText) {
+                    alert('변환할 대본을 입력해주세요.');
+                    return;
+                }
+
+                const textChunks = splitTextIntoChunks(originalText);
+                segmentedTextsContainer.innerHTML = ''; // 기존 청크 모두 제거
+                noSegmentsMessage.style.display = 'none'; // 메시지 숨김
+
+                if (textChunks.length === 0) {
+                    noSegmentsMessage.style.display = 'block';
+                    noSegmentsMessage.textContent = "분할할 텍스트가 없습니다. 대본을 다시 확인해주세요.";
+                    return;
+                }
+
+                textChunks.forEach((chunk, index) => {
+                    const segmentDiv = document.createElement('div');
+                    segmentDiv.classList.add('text-segment');
+                    segmentDiv.innerHTML = `
+                        <label>청크 ${index + 1} (바이트: ${getByteLength(chunk)})</label>
+                        <textarea readonly>${chunk}</textarea>
+                        <div class="segment-actions">
+                            <button class="btn-primary convert-segment-btn" data-index="${index}">음성 변환</button>
+                            <button class="btn-secondary download-segment-btn" data-index="${index}" disabled>MP3 다운로드</button>
+                            <span class="download-status" id="segment-status-${index}">준비됨</span>
+                        </div>
+                        <audio controls id="segment-audio-player-${index}" style="display:none;"></audio>
+                    `;
+                    segmentedTextsContainer.appendChild(segmentDiv);
+                });
+
+                // 동적으로 생성된 버튼에 이벤트 리스너 추가
+                document.querySelectorAll('.convert-segment-btn').forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const index = event.target.dataset.index;
+                        const chunkText = textChunks[index];
+                        const segmentStatus = document.getElementById(`segment-status-${index}`);
+                        const segmentAudioPlayer = document.getElementById(`segment-audio-player-${index}`);
+                        const segmentDownloadBtn = document.querySelector(`.download-segment-btn[data-index="${index}"]`);
+
+                        // 오디오 플레이어 보이기
+                        segmentAudioPlayer.style.display = 'block';
+
+                        commonConvertAndDownload(
+                            chunkText, 
+                            'text', 
+                            segmentStatus, 
+                            segmentAudioPlayer, 
+                            segmentDownloadBtn, 
+                            `변환된_청크_${index + 1}`
+                        );
+                    });
+                });
+            });
+
+            // 초기 로드 시 기록 로드 (히스토리 탭이 기본 active가 아닐 수 있으므로 DOMContentLoaded 시점에는 로드하지 않음)
+            // loadHistory(); // 탭 활성화 시에만 로드하도록 변경
+        });
     </script>
-    <script src="https://ai.okko.kr/bookmark/textro/ui-manager.js"></script> 
 </body>
 </html>
