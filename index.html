@@ -20,48 +20,48 @@
             --shadow-medium: rgba(0,0,0,0.1);
         }
 
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            line-height: 1.6; 
-            color: var(--text-color); 
-            background-color: var(--background-color); 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
             display: flex; /* flexbox를 사용하여 중앙 컨테이너 정렬 */
             justify-content: center;
             align-items: flex-start; /* 상단 정렬 */
             min-height: 100vh; /* 최소 높이 */
         }
-        .main-layout { 
+        .main-layout {
             width: 100%;
             max-width: 900px; /* 고정된 최대 너비 */
-            background-color: var(--card-background); 
-            border-radius: 8px; 
-            box-shadow: 0 4px 12px var(--shadow-medium); 
-            overflow: hidden; 
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-medium);
+            overflow: hidden;
             display: flex;
             flex-direction: column; /* 세로 방향 정렬 */
         }
-        .content-wrapper { 
-            padding: 30px; 
+        .content-wrapper {
+            padding: 30px;
         }
-        .container { 
+        .container {
             max-width: 100%; /* .main-layout의 max-width를 따르도록 */
-            margin: 0 auto; 
+            margin: 0 auto;
         }
-        h1, h2, h3 { 
-            color: var(--dark-text); 
+        h1, h2, h3 {
+            color: var(--dark-text);
             margin-top: 0;
             margin-bottom: 15px;
         }
-        .form-group { 
-            margin-bottom: 20px; 
+        .form-group {
+            margin-bottom: 20px;
         }
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: bold; 
-            color: var(--light-text); 
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--light-text);
         }
         textarea, input[type="text"], input[type="password"], input[type="number"], select {
             width: calc(100% - 22px); /* 패딩 및 보더 고려 */
@@ -72,9 +72,9 @@
             box-sizing: border-box;
             background-color: #fcfcfc;
         }
-        textarea { 
-            min-height: 120px; 
-            resize: vertical; 
+        textarea {
+            min-height: 120px;
+            resize: vertical;
         }
         .btn-primary, .btn-secondary, .btn-accent {
             padding: 10px 18px;
@@ -86,52 +86,52 @@
             transition: background-color 0.2s, transform 0.1s;
             white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
         }
-        .btn-primary { 
-            background-color: var(--primary-color); 
-            color: white; 
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
         }
-        .btn-primary:hover { 
-            background-color: #0056b3; 
+        .btn-primary:hover {
+            background-color: #0056b3;
             transform: translateY(-1px);
         }
-        .btn-secondary { 
-            background-color: var(--secondary-color); 
-            color: white; 
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
         }
-        .btn-secondary:hover { 
-            background-color: #5a6268; 
+        .btn-secondary:hover {
+            background-color: #5a6268;
             transform: translateY(-1px);
         }
-        .btn-accent { 
-            background-color: var(--accent-color); 
-            color: var(--dark-text); 
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: var(--dark-text);
         }
-        .btn-accent:hover { 
-            background-color: #e0a800; 
+        .btn-accent:hover {
+            background-color: #e0a800;
             transform: translateY(-1px);
         }
-        .btn-group { 
-            margin-top: 20px; 
-            display: flex; 
-            flex-wrap: wrap; 
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
         }
-        .status { 
-            margin-top: 20px; 
-            padding: 10px; 
-            border-radius: 4px; 
-            background-color: #e9ecef; 
-            color: var(--text-color); 
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            color: var(--text-color);
         }
-        audio { 
-            width: 100%; 
-            margin-top: 20px; 
+        audio {
+            width: 100%;
+            margin-top: 20px;
         }
-        .tooltip { 
-            position: relative; 
-            display: inline-block; 
-            cursor: help; 
-            margin-left: 5px; 
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 5px;
         }
         .tooltip .tooltiptext {
             visibility: hidden;
@@ -160,17 +160,17 @@
             border-style: solid;
             border-color: #555 transparent transparent transparent;
         }
-        .tooltip:hover .tooltiptext { 
-            visibility: visible; 
-            opacity: 1; 
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
-        .api-key-input-wrapper { 
-            display: flex; 
-            align-items: center; 
+        .api-key-input-wrapper {
+            display: flex;
+            align-items: center;
         }
-        .api-key-input { 
-            flex-grow: 1; 
-            margin-right: 10px; 
+        .api-key-input {
+            flex-grow: 1;
+            margin-right: 10px;
         }
         .api-key-toggle-btn {
             background: none;
@@ -180,39 +180,39 @@
             border-radius: 4px;
             color: var(--light-text);
         }
-        .tabs { 
-            display: flex; 
-            margin-bottom: 20px; 
-            border-bottom: 1px solid var(--border-color); 
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
-        .tab { 
-            padding: 10px 15px; 
-            cursor: pointer; 
-            border: 1px solid transparent; 
-            border-bottom: none; 
-            margin-bottom: -1px; 
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-bottom: -1px;
             transition: background-color 0.2s;
         }
-        .tab.active { 
-            border-color: var(--border-color); 
-            border-bottom-color: var(--card-background); 
-            background-color: var(--card-background); 
+        .tab.active {
+            border-color: var(--border-color);
+            border-bottom-color: var(--card-background);
+            background-color: var(--card-background);
             font-weight: bold;
         }
         .tab:hover:not(.active) {
             background-color: #f0f0f0;
         }
-        .tab-content { 
-            display: none; 
+        .tab-content {
+            display: none;
         }
-        .tab-content.active { 
-            display: block; 
+        .tab-content.active {
+            display: block;
         }
-        .ssml-tags { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 8px; 
-            margin-bottom: 15px; 
+        .ssml-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
         }
         .ssml-tag {
             background-color: #e9ecef;
@@ -222,33 +222,33 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .ssml-tag:hover { 
-            background-color: #d1d8e0; 
+        .ssml-tag:hover {
+            background-color: #d1d8e0;
         }
-        .char-counter-display { 
-            font-size: 0.85em; 
-            color: var(--light-text); 
-            text-align: right; 
-            margin-top: 5px; 
+        .char-counter-display {
+            font-size: 0.85em;
+            color: var(--light-text);
+            text-align: right;
+            margin-top: 5px;
         }
-        .voice-controls { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 20px; 
+        .voice-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             background-color: #f9f9f9;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #eee;
             margin-bottom: 20px;
         }
-        .control-group input[type="range"] { 
-            width: calc(100% - 70px); 
-            vertical-align: middle; 
+        .control-group input[type="range"] {
+            width: calc(100% - 70px);
+            vertical-align: middle;
             margin-right: 10px;
         }
-        .control-group span { 
-            display: inline-block; 
-            width: 50px; 
+        .control-group span {
+            display: inline-block;
+            width: 50px;
             text-align: right;
             font-weight: bold;
             color: var(--dark-text);
@@ -305,13 +305,13 @@
         .download-status.pending { color: orange; }
 
         /* 새로운 푸터 디자인 */
-        footer { 
-            margin-top: 40px; 
-            padding-top: 20px; 
-            border-top: 1px solid #eee; 
-            text-align: center; 
-            font-size: 0.85em; 
-            color: var(--light-text); 
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.85em;
+            color: var(--light-text);
             background-color: #f0f3f6; /* 약간 다른 배경색 */
             padding: 20px 30px;
             border-bottom-left-radius: 8px;
@@ -334,6 +334,13 @@
             max-width: 45%; /* 두 개의 카드만 표시될 때 */
             box-shadow: 0 2px 5px var(--shadow-light);
             text-align: left;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .footer-card:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                0 6px 16px rgba(0, 0, 0, 0.08);
         }
         .footer-card h4 {
             margin-top: 0;
@@ -345,6 +352,14 @@
             font-size: 0.9em;
             color: var(--light-text);
             margin-bottom: 0;
+        }
+        .footer-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-card a:hover {
+            text-decoration: underline;
         }
 
         /* 반응형 디자인 */
@@ -369,7 +384,7 @@
 
                 <div class="api-key-section">
                     <div class="form-group">
-                        <label for="api-key">구글 TTS API 키 입력 
+                        <label for="api-key">구글 TTS API 키 입력
                             <span class="tooltip">
                                 <span class="tooltiptext">구글 클라우드 콘솔에서 API 키를 생성한 후 여기에 입력하세요. API 키는 로컬에만 저장되며 서버로 전송되지 않습니다.</span>
                             </span>
@@ -459,7 +474,7 @@
                 </div>
 
                 <div id="segmented-texts-container">
-                    <h2>분할된 텍스트 청크 (&lt;5000 바이트)</h2>
+                    <h2>분할된 텍스트 청크 (<5000 바이트)</h2>
                     <p id="no-segments-message" style="color: var(--light-text); margin-top: 15px;">
                         '긴 대본 입력' 섹션에서 '대본 분할 및 준비' 버튼을 눌러 대본을 분할하세요.
                     </p>
@@ -473,7 +488,7 @@
                             <option value="ko-KR-Standard-A">ko-KR-Standard-A (여성)</option>
                             <option value="ko-KR-Standard-B">ko-KR-Standard-B (여성)</option>
                             <option value="ko-KR-Standard-C">ko-KR-Standard-C (남성)</option>
-                            <option value="ko-KR-Standard-D">ko-KR-Standard-D (남성)</option>                            
+                            <option value="ko-KR-Standard-D">ko-KR-Standard-D (남성)</option>
                             <option value="ko-KR-Neural2-A">ko-KR-Neural2-A (여성)</option>
                             <option value="ko-KR-Neural2-B">ko-KR-Neural2-B (여성)</option>
                             <option value="ko-KR-Neural2-C">ko-KR-Neural2-C (남성)</option>
@@ -512,20 +527,29 @@
                 </div>
 
                 <footer>
+                    <p style="margin-bottom: 20px;">구글 Text-to-Speech API를 사용하여 제작되었습니다. 아래 유용한 링크들을 확인해보세요.</p>
                     <div class="footer-cards">
-                        <div class="footer-card">
-                            <h4>알랑가IT꿀팁 (구글 텍스트투스피치 음성변환툴)</h4>
-                            <p>음성변환툴 - 새로운 기능이 추가되었는지 확인해보세요.</p>
-                            <p style="margin-top: 10px; font-size: 0.8em;"><a href="https://www.youtube.com/@YOUR_CHANNEL_ID_HERE" target="_blank" style="color: var(--primary-color); text-decoration: none;">유튜브 채널 바로가기</a></p>
+                        <div class='footer-card'>
+                            <h4><a href='https://cloud.google.com' target='_blank' rel='noopener noreferrer'>구글클라우드</a></h4>
+                            <p>Google Cloud에 가입하면 $300 상당의 무료 크레딧을 받을 수 있습니다. 무료 사용 기간이 지나도 구글 텍스트를 음성으로 변환시 1달에 최대 400만자 이상 무료로 사용할수 있습니다.</p>
                         </div>
-                        <div class="footer-card">
-                            <h4>음성 피치 & 속도 조절기</h4>
-                            <p>Chirp 3 HD 고품질 음성은 그대로, 원하는 톤으로 변경해보세요.</p>
-                            <p style="margin-top: 10px; font-size: 0.8em;">다양한 음성 모델로 최적의 음성을 찾아보세요.</p>
+                        <div class='footer-card'>
+                            <h4><a href='https://console.cloud.google.com/apis/credentials?hl=ko' target='_blank' rel='noopener noreferrer'>구글 클라우드 사용자 인증정보</a></h4>
+                            <p>API 키를 사용할 수 있는 위치와 대상을 제한하여 무단 사용을 방지하세요!</p>
+                        </div>
+                        <div class='footer-card'>
+                            <h4><a href='https://cloud.google.com/text-to-speech/pricing?hl=kr' target='_blank' rel='noopener noreferrer'>구글 Text-to-Speech 가격 책정</a></h4>
+                            <p>매월 무료로 표준 음성만 400만자 입니다. WaveNet 음성으로 100만자, Neural2 음성 100만 바이트 등등을 추가로 사용할수 있습니다.</p>
+                        </div>
+                        <div class='footer-card'>
+                            <h4><a href='https://console.cloud.google.com/apis/api/texttospeech.googleapis.com/quotas?hl=ko&inv=1&invt=Abx_6Q&project=' target='_blank' rel='noopener noreferrer'>Text-to-Speech API의 할당량 조회</a></h4>
+                            <p>API 사용량을 실시간으로 모니터링하여 할당량에 얼마나 근접했는지 자주 확인하세요</p>
+                        </div>
+                        <div class='footer-card'>
+                            <h4><a href='https://studio.youtube.com/' target='_blank' rel='noopener noreferrer'>유튜브 스튜디오</a></h4>
+                            <p>YouTube 크리에이터들을 위한 공식 관리 플랫폼</p>
                         </div>
                     </div>
-                    <p>구글 Text-to-Speech API를 사용하여 제작되었습니다. API 사용량은 구글 클라우드 콘솔에서 확인하세요.</p>
-                    <p style="font-size: 0.75em; margin-top: 5px;"><a href="https://cloud.google.com/text-to-speech/pricing" target="_blank" style="color: var(--primary-color); text-decoration: none;">Google TTS 가격 정책 및 할당량 확인</a></p>
                 </footer>
             </div> </div> </div> <script>
         // 기존 base64ToBlob_local 함수 (변경 없음)
@@ -574,7 +598,7 @@
                     tab.classList.add('active');
                     const targetTab = tab.dataset.tab;
                     document.getElementById(`${targetTab}-tab`).classList.add('active');
-                    
+
                     // 기록 탭 활성화 시 기록 로드
                     if (targetTab === 'history') {
                         loadHistory();
@@ -632,7 +656,7 @@
                     const start = ssmlInput.selectionStart;
                     const end = ssmlInput.selectionEnd;
                     const text = ssmlInput.value;
-                    
+
                     if (tag === 'break') {
                         // break 태그는 항상 빈 태그이므로 선택 영역 무시
                         ssmlInput.value = text.substring(0, start) + tagText + text.substring(end);
@@ -707,7 +731,7 @@
                         flex-direction: column;
                         gap: 10px;
                     `;
-                    
+
                     const textDisplay = document.createElement('p');
                     textDisplay.innerHTML = `<strong>텍스트:</strong> ${item.text.length > 100 ? item.text.substring(0, 100) + '...' : item.text}`;
                     textDisplay.style.fontSize = '0.95em';
@@ -715,9 +739,9 @@
 
                     const infoDisplay = document.createElement('p');
                     infoDisplay.innerHTML = `
-                        <strong>음성:</strong> ${item.voiceName} | 
-                        <strong>속도:</strong> ${item.rate} | 
-                        <strong>높이:</strong> ${item.pitch} | 
+                        <strong>음성:</strong> ${item.voiceName} |
+                        <strong>속도:</strong> ${item.rate} |
+                        <strong>높이:</strong> ${item.pitch} |
                         <strong>볼륨:</strong> ${item.volumeGainDb} |
                         <strong>날짜:</strong> ${new Date(item.timestamp).toLocaleString()}
                     `;
@@ -728,7 +752,7 @@
                     audioPlayer.controls = true;
                     const blob = base64ToBlob_local(item.audioContent, 'audio/mpeg');
                     audioPlayer.src = URL.createObjectURL(blob);
-                    
+
                     const downloadLink = document.createElement('a');
                     downloadLink.href = URL.createObjectURL(blob);
                     downloadLink.download = `${item.fileName}.mp3`;
@@ -779,7 +803,7 @@
                     statusElement.style.color = 'red';
                     return;
                 }
-                
+
                 statusElement.textContent = '음성 변환 중...';
                 statusElement.style.color = 'orange';
                 downloadButtonElement.disabled = true;
@@ -789,7 +813,7 @@
                 const rate = parseFloat(rateSlider.value);
                 const pitch = parseInt(pitchSlider.value);
                 const volumeGainDb = parseInt(volumeSlider.value);
-                
+
                 // Chirp 모델 확인 (ko-KR-Chirp3-HD- 로 시작하는지)
                 const isChirpModel = voiceName.startsWith('ko-KR-Chirp3-HD-');
 
@@ -872,11 +896,11 @@
 
             generalConvertBtn.addEventListener('click', () => {
                 commonConvertAndDownload(
-                    generalTextInput.value, 
-                    'text', 
-                    generalStatus, 
-                    generalAudioPlayer, 
-                    generalDownloadBtn, 
+                    generalTextInput.value,
+                    'text',
+                    generalStatus,
+                    generalAudioPlayer,
+                    generalDownloadBtn,
                     '일반텍스트_변환'
                 );
             });
@@ -890,11 +914,11 @@
 
             ssmlConvertBtn.addEventListener('click', () => {
                 commonConvertAndDownload(
-                    ssmlInput.value, 
-                    'ssml', 
-                    ssmlStatus, 
-                    ssmlAudioPlayer, 
-                    ssmlDownloadBtn, 
+                    ssmlInput.value,
+                    'ssml',
+                    ssmlStatus,
+                    ssmlAudioPlayer,
+                    ssmlDownloadBtn,
                     'SSML_변환'
                 );
             });
@@ -1001,11 +1025,11 @@
                         segmentAudioPlayer.style.display = 'block';
 
                         commonConvertAndDownload(
-                            chunkText, 
-                            'text', 
-                            segmentStatus, 
-                            segmentAudioPlayer, 
-                            segmentDownloadBtn, 
+                            chunkText,
+                            'text',
+                            segmentStatus,
+                            segmentAudioPlayer,
+                            segmentDownloadBtn,
                             `변환된_청크_${index + 1}`
                         );
                     });
