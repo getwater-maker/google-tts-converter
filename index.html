@@ -588,14 +588,37 @@
             </div>
         </footer>
     </div> <script>
-        // 기존 base64ToBlob_local 함수 (변경 없음)
-        function base64ToBlob_local(_0x250c9e,_0xe43810){const _0x284da4=a0_0x34c5;try{const _0x12ece4=atob(_0x250c9e),_0x38c40b=[];for(let _0x5eeb5f=0x0;_0x5eeb5f<_0x12ece4[_0x284da4(0x1f3)];_0x5eeb5f+=0x200){const _0x52e634=_0x12ece4[_0x284da4(0x205)](_0x5eeb5f,_0x5eeb5f+0x200),_0x254127=new Array(_0x52e634[_0x284da4(0x1f3)]);for(let _0x2850c0=0x0;_0x2850c0<_0x52e634[_0x284da4(0x1f3)];_0x2850c0++){_0x254127[_0x2850c0]=_0x52e634[_0x284da4(0x204)](_0x2850c0);}const _0x214e00=new Uint8Array(_0x254127);_0x38c40b[_0x284da4(0x20c)](_0x214e00);}return new Blob(_0x38c40b,{'type':_0xe43810});}catch(_0x204b62){return console[_0x284da4(0x203)]('Error\\x20in\\x20base64ToBlob_local:',_0x204b62),null;}}
+        // 수정된 base64ToBlob_local 함수 (브라우저 내장 atob 사용)
+        function base64ToBlob_local(base64Data, contentType) {
+            try {
+                // 이 부분이 변경되었습니다. 내장 atob() 함수를 직접 사용합니다.
+                const byteCharacters = atob(base64Data);
+                const byteArrays = [];
 
-        // 기존 synthesizeSpeech_local 함수 (변경 없음)
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) { // 512 대신 200이었던 부분을 512로 변경 (더 큰 청크로 처리)
+                    const slice = byteCharacters.slice(offset, offset + 512);
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                return new Blob(byteArrays, { type: contentType });
+            } catch (error) {
+                console.error('Error in base64ToBlob_local (native atob or blob creation):', error, 'base64Data length:', base64Data ? base64Data.length : 0);
+                // 추가 디버깅을 위해 base64Data의 일부를 로깅합니다.
+                console.error('Problematic base64Data start:', base64Data ? base64Data.substring(0, 100) + '...' : 'N/A');
+                return null;
+            }
+        }
+
+        // 기존 synthesizeSpeech_local 함수 (난독화된 부분은 그대로 유지)
         async function synthesizeSpeech_local(_0x3510d9,_0x11db89){const _0x1553d3=a0_0x34c5,{textToConvert:_0x185084,inputType:_0x175e7d,voice:_0x110719,rate:_0x6cc6f1,pitch:_0x35bc1f,volumeGainDb:_0x2b41fb,isChirpModel:_0x78887a}=_0x11db89;let _0x49336f={};if(_0x175e7d===_0x1553d3(0x1f5)){if(!_0x185084)return{'error':_0x1553d3(0x1f2)};_0x49336f[_0x1553d3(0x1f5)]=_0x185084;}else{if(_0x175e7d===_0x1553d3(0x1ee)){if(!_0x185084)return{'error':_0x1553d3(0x1f4)};if(!_0x185084[_0x1553d3(0x1ed)]('<speak>')||!_0x185084[_0x1553d3(0x1f6)](_0x1553d3(0x20b)))return{'error':_0x1553d3(0x1fd)};_0x49336f[_0x1553d3(0x1ee)]=_0x185084;}else return{'error':'알\\x20수\\x20없는\\x20입력\\x20타입입니다.'};}const _0x39fd65=_0x78887a?_0x1553d3(0x1fb):'v1',_0x27c93b='https://texttospeech.googleapis.com/'+_0x39fd65+_0x1553d3(0x208)+_0x3510d9,_0xc278e2={'input':_0x49336f,'voice':{'languageCode':_0x1553d3(0x1f0),'name':_0x110719},'audioConfig':{'audioEncoding':'MP3','speakingRate':_0x6cc6f1,'volumeGainDb':_0x2b41fb}};!_0x78887a&&_0xc278e2[_0x1553d3(0x1f7)]&&(_0xc278e2[_0x1553d3(0x1f7)][_0x1553d3(0x1fe)]=_0x35bc1f);try{const _0x43200b=await fetch(_0x27c93b,{'method':'POST','headers':{'Content-Type':'application/json'},'body':JSON[_0x1553d3(0x1ef)](_0xc278e2)}),_0x8012ed=await _0x43200b['json']();if(!_0x43200b['ok']){const _0x52579b=_0x8012ed[_0x1553d3(0x203)]&&_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]?_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]:_0x1553d3(0x1f1);return console[_0x1553d3(0x203)](_0x1553d3(0x1f8),_0x8012ed),{'error':_0x1553d3(0x1f9)+_0x52579b+'\\x20(코드:\\x20'+_0x43200b['status']+')','details':_0x8012ed};}if(!_0x8012ed[_0x1553d3(0x201)])return{'error':_0x1553d3(0x1ff)};return{'audioContent':_0x8012ed[_0x1553d3(0x201)]};}catch(_0xfd9d59){return console['error'](_0x1553d3(0x1ec),_0xfd9d59),{'error':_0x1553d3(0x206)+_0xfd9d59[_0x1553d3(0x209)]};}}
 
-        // 기존 난독화된 유틸리티 함수들 (코드 유지)
-        (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNrVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMcdRMjdRIPqGqvbjioYALoYYRsdSI6tTJkG6ia','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
+        // 기존 난독화된 유틸리티 함수들 (코드 유지) - synthesizeSpeech_local에서 사용됨
+        (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNjVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMoQWGcdRSjZSG53TLOJSIRxRI4JRI6qU','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
 
         // 새롭게 추가된 UI 관리 및 기능 로직
         document.addEventListener('DOMContentLoaded', () => {
@@ -867,58 +890,76 @@
                         isChirpModel: isChirpModel
                     });
 
+                    // API 응답 자체에 오류가 있는지 먼저 확인
                     if (response.error) {
                         statusElement.textContent = `오류: ${response.error}`;
                         statusElement.style.color = 'red';
-                        console.error('TTS API Error:', response.details || response.error);
+                        console.error('TTS API 응답 오류:', response.details || response.error);
                         return { success: false, error: response.error };
-                    } else if (response.audioContent) {
-                        const audioBlob = base64ToBlob_local(response.audioContent, 'audio/mpeg');
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        audioPlayerElement.src = audioUrl;
-                        audioPlayerElement.load();
-                        audioPlayerElement.play();
-
-                        statusElement.textContent = '음성 변환 완료!';
-                        statusElement.style.color = 'green';
-                        downloadButtonElement.disabled = false;
-
-                        // 파일 이름 생성 (날짜 및 시간 추가)
-                        const now = new Date();
-                        const fileName = `${filenamePrefix}_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-                        downloadButtonElement.onclick = () => {
-                            const a = document.createElement('a');
-                            a.href = audioUrl;
-                            a.download = `${fileName}.mp3`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        };
-
-                        // 기록 저장 (긴 대본은 개별 세그먼트만 저장)
-                        if (!filenamePrefix.startsWith('변환된_분할된대본')) { // 분할된 대본이 아닌 경우에만 기록에 저장
-                            history.unshift({ // 최신 기록을 맨 앞에 추가
-                                text: textToConvert,
-                                inputType: inputType,
-                                voiceName: voiceName,
-                                rate: rate,
-                                pitch: pitch,
-                                volumeGainDb: volumeGainDb,
-                                audioContent: response.audioContent, // base64 인코딩된 오디오 데이터 저장
-                                fileName: fileName,
-                                timestamp: Date.now()
-                            });
-                            // 최대 기록 수 제한
-                            history = history.slice(0, parseInt(maxHistoryInput.value));
-                            saveHistory();
-                        }
-                        return { success: true, audioBlob: audioBlob }; // Blob 반환
-
-                    } else {
-                        statusElement.textContent = '오류: 오디오 콘텐츠를 받아오지 못했습니다.';
-                        statusElement.style.color = 'red';
-                        return { success: false, error: '오디오 콘텐츠 없음' };
                     }
+
+                    // audioContent의 유효성 검사 강화
+                    if (!response.audioContent || typeof response.audioContent !== 'string' || response.audioContent.length === 0) {
+                        const errorMessage = '오류: API로부터 유효한 오디오 콘텐츠(base64 문자열)를 받지 못했습니다. API 응답을 확인하세요.';
+                        statusElement.textContent = errorMessage;
+                        statusElement.style.color = 'red';
+                        console.error(errorMessage, '수신된 응답 전체:', response); // 응답 전체 로그
+                        return { success: false, error: errorMessage };
+                    }
+
+                    console.log('Received audioContent (base64, first 50 chars):', response.audioContent.substring(0, 50) + '...'); // 추가된 로그
+                    const audioBlob = base64ToBlob_local(response.audioContent, 'audio/mpeg');
+                    
+                    if (!audioBlob || !(audioBlob instanceof Blob)) {
+                        const errorMessage = '오류: base64ToBlob_local에서 유효한 Blob을 생성하지 못했습니다. (base64 데이터 문제일 수 있음)';
+                        statusElement.textContent = errorMessage;
+                        statusElement.style.color = 'red';
+                        console.error(errorMessage, '생성된 audioBlob:', audioBlob, '원본 audioContent 길이:', response.audioContent ? response.audioContent.length : 0);
+                        return { success: false, error: errorMessage };
+                    }
+
+                    console.log('Generated audioBlob:', audioBlob); // 추가된 로그
+
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayerElement.src = audioUrl;
+                    audioPlayerElement.load();
+                    audioPlayerElement.play();
+
+                    statusElement.textContent = '음성 변환 완료!';
+                    statusElement.style.color = 'green';
+                    downloadButtonElement.disabled = false;
+
+                    // 파일 이름 생성 (날짜 및 시간 추가)
+                    const now = new Date();
+                    const fileName = `${filenamePrefix}_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                    downloadButtonElement.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = audioUrl;
+                        a.download = `${fileName}.mp3`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+
+                    // 기록 저장 (긴 대본은 개별 세그먼트만 저장)
+                    if (!filenamePrefix.startsWith('변환된_분할된대본')) { // 분할된 대본이 아닌 경우에만 기록에 저장
+                        history.unshift({ // 최신 기록을 맨 앞에 추가
+                            text: textToConvert,
+                            inputType: inputType,
+                            voiceName: voiceName,
+                            rate: rate,
+                            pitch: pitch,
+                            volumeGainDb: volumeGainDb,
+                            audioContent: response.audioContent, // base64 인코딩된 오디오 데이터 저장
+                            fileName: fileName,
+                            timestamp: Date.now()
+                        });
+                        // 최대 기록 수 제한
+                        history = history.slice(0, parseInt(maxHistoryInput.value));
+                        saveHistory();
+                    }
+                    return { success: true, audioBlob: audioBlob }; // Blob 반환
+
                 } catch (error) {
                     statusElement.textContent = `네트워크 오류: ${error.message}`;
                     statusElement.style.color = 'red';
@@ -1199,7 +1240,8 @@
 
                 segmentedBlobs.forEach((item, index) => {
                     setTimeout(() => {
-                        const url = URL.createObjectURL(item.blob);
+                        console.log(`Attempting to createObjectURL for segment ${index}, item.blob:`, item.blob); // 추가된 로그
+                        const url = URL.createObjectURL(item.blob); 
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = item.filename;
