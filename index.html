@@ -3,27 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 알랑가 IT 꿀팁(구글 TTS 한국어 변환기)</title>
+    <title>구글 TTS 한국어 변환기 (대본 분할 및 고품질 음성)</title>
     <style>
-        /* 기존 style.css 내용을 여기에 붙여넣거나, 별도 파일로 관리하여 링크하세요. */
-        /* 예시로 기본적인 스타일만 추가합니다. */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .main-layout { display: flex; max-width: 1200px; margin: 0 auto; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
-        .sidebar-iframe { flex: 0 0 200px; border: none; height: 100vh; /* 예시 높이 */ }
-        .content-wrapper { flex-grow: 1; padding: 30px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1, h2, h3 { color: #2c3e50; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        /* 기본 색상 변수 */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --accent-color: #ffc107;
+            --text-color: #333;
+            --light-text: #666;
+            --dark-text: #2c3e50;
+            --background-color: #f4f7f6;
+            --card-background: #fff;
+            --border-color: #ddd;
+            --shadow-light: rgba(0,0,0,0.05);
+            --shadow-medium: rgba(0,0,0,0.1);
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: var(--text-color); 
+            background-color: var(--background-color); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; /* flexbox를 사용하여 중앙 컨테이너 정렬 */
+            justify-content: center;
+            align-items: flex-start; /* 상단 정렬 */
+            min-height: 100vh; /* 최소 높이 */
+        }
+        .main-layout { 
+            width: 100%;
+            max-width: 900px; /* 고정된 최대 너비 */
+            background-color: var(--card-background); 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px var(--shadow-medium); 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column; /* 세로 방향 정렬 */
+        }
+        .content-wrapper { 
+            padding: 30px; 
+        }
+        .container { 
+            max-width: 100%; /* .main-layout의 max-width를 따르도록 */
+            margin: 0 auto; 
+        }
+        h1, h2, h3 { 
+            color: var(--dark-text); 
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: var(--light-text); 
+        }
         textarea, input[type="text"], input[type="password"], input[type="number"], select {
-            width: calc(100% - 20px);
+            width: calc(100% - 22px); /* 패딩 및 보더 고려 */
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 1rem;
             box-sizing: border-box;
+            background-color: #fcfcfc;
         }
-        textarea { min-height: 120px; resize: vertical; }
+        textarea { 
+            min-height: 120px; 
+            resize: vertical; 
+        }
         .btn-primary, .btn-secondary, .btn-accent {
             padding: 10px 18px;
             border: none;
@@ -31,18 +83,56 @@
             cursor: pointer;
             font-size: 1rem;
             margin-right: 10px;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
+            white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
         }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5a6268; }
-        .btn-accent { background-color: #ffc107; color: #333; }
-        .btn-accent:hover { background-color: #e0a800; }
-        .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;}
-        .status { margin-top: 20px; padding: 10px; border-radius: 4px; background-color: #e9ecef; color: #333; }
-        audio { width: 100%; margin-top: 20px; }
-        .tooltip { position: relative; display: inline-block; cursor: help; margin-left: 5px; }
+        .btn-primary { 
+            background-color: var(--primary-color); 
+            color: white; 
+        }
+        .btn-primary:hover { 
+            background-color: #0056b3; 
+            transform: translateY(-1px);
+        }
+        .btn-secondary { 
+            background-color: var(--secondary-color); 
+            color: white; 
+        }
+        .btn-secondary:hover { 
+            background-color: #5a6268; 
+            transform: translateY(-1px);
+        }
+        .btn-accent { 
+            background-color: var(--accent-color); 
+            color: var(--dark-text); 
+        }
+        .btn-accent:hover { 
+            background-color: #e0a800; 
+            transform: translateY(-1px);
+        }
+        .btn-group { 
+            margin-top: 20px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px;
+        }
+        .status { 
+            margin-top: 20px; 
+            padding: 10px; 
+            border-radius: 4px; 
+            background-color: #e9ecef; 
+            color: var(--text-color); 
+        }
+        audio { 
+            width: 100%; 
+            margin-top: 20px; 
+        }
+        .tooltip { 
+            position: relative; 
+            display: inline-block; 
+            cursor: help; 
+            margin-left: 5px; 
+        }
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 200px;
@@ -70,22 +160,60 @@
             border-style: solid;
             border-color: #555 transparent transparent transparent;
         }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-        .api-key-input-wrapper { display: flex; align-items: center; }
-        .api-key-input { flex-grow: 1; margin-right: 10px; }
+        .tooltip:hover .tooltiptext { 
+            visibility: visible; 
+            opacity: 1; 
+        }
+        .api-key-input-wrapper { 
+            display: flex; 
+            align-items: center; 
+        }
+        .api-key-input { 
+            flex-grow: 1; 
+            margin-right: 10px; 
+        }
         .api-key-toggle-btn {
             background: none;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             padding: 10px;
             cursor: pointer;
             border-radius: 4px;
+            color: var(--light-text);
         }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
-        .tab { padding: 10px 15px; cursor: pointer; border: 1px solid transparent; border-bottom: none; margin-bottom: -1px; }
-        .tab.active { border-color: #ddd; border-bottom-color: #fff; background-color: #fff; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .ssml-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .tabs { 
+            display: flex; 
+            margin-bottom: 20px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .tab { 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            border: 1px solid transparent; 
+            border-bottom: none; 
+            margin-bottom: -1px; 
+            transition: background-color 0.2s;
+        }
+        .tab.active { 
+            border-color: var(--border-color); 
+            border-bottom-color: var(--card-background); 
+            background-color: var(--card-background); 
+            font-weight: bold;
+        }
+        .tab:hover:not(.active) {
+            background-color: #f0f0f0;
+        }
+        .tab-content { 
+            display: none; 
+        }
+        .tab-content.active { 
+            display: block; 
+        }
+        .ssml-tags { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            margin-bottom: 15px; 
+        }
         .ssml-tag {
             background-color: #e9ecef;
             padding: 6px 12px;
@@ -94,12 +222,37 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .ssml-tag:hover { background-color: #d1d8e0; }
-        .char-counter-display { font-size: 0.85em; color: #666; text-align: right; margin-top: 5px; }
-        .voice-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .control-group input[type="range"] { width: calc(100% - 70px); vertical-align: middle; margin-right: 10px;}
-        .control-group span { display: inline-block; width: 50px; text-align: right;}
-        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 0.85em; color: #777; }
+        .ssml-tag:hover { 
+            background-color: #d1d8e0; 
+        }
+        .char-counter-display { 
+            font-size: 0.85em; 
+            color: var(--light-text); 
+            text-align: right; 
+            margin-top: 5px; 
+        }
+        .voice-controls { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .control-group input[type="range"] { 
+            width: calc(100% - 70px); 
+            vertical-align: middle; 
+            margin-right: 10px;
+        }
+        .control-group span { 
+            display: inline-block; 
+            width: 50px; 
+            text-align: right;
+            font-weight: bold;
+            color: var(--dark-text);
+        }
 
         /* 새로 추가될 텍스트 분할 영역 스타일 */
         #original-text-section {
@@ -115,17 +268,17 @@
             padding-top: 20px;
         }
         .text-segment {
-            background-color: #ffffff;
+            background-color: var(--card-background);
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px var(--shadow-light);
         }
         .text-segment label {
             font-size: 1.1em;
             margin-bottom: 10px;
-            color: #34495e;
+            color: var(--dark-text);
         }
         .text-segment textarea {
             min-height: 80px;
@@ -142,31 +295,72 @@
         .download-status {
             margin-left: auto; /* 우측 정렬 */
             font-size: 0.9em;
-            color: #555;
+            color: var(--light-text);
             min-width: 100px;
             text-align: right;
         }
         .download-status.success { color: green; font-weight: bold; }
         .download-status.error { color: red; font-weight: bold; }
         .download-status.pending { color: orange; }
+
+        /* 새로운 푸터 디자인 */
+        footer { 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 1px solid #eee; 
+            text-align: center; 
+            font-size: 0.85em; 
+            color: var(--light-text); 
+            background-color: #f0f3f6; /* 약간 다른 배경색 */
+            padding: 20px 30px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        .footer-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .footer-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            flex: 1 1 300px; /* 유연하게 크기 조절 */
+            max-width: 45%; /* 두 개의 카드만 표시될 때 */
+            box-shadow: 0 2px 5px var(--shadow-light);
+            text-align: left;
+        }
+        .footer-card h4 {
+            margin-top: 0;
+            color: var(--dark-text);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .footer-card p {
+            font-size: 0.9em;
+            color: var(--light-text);
+            margin-bottom: 0;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .content-wrapper { padding: 20px; }
+            .main-layout { margin: 0; border-radius: 0; box-shadow: none; }
+            .footer-card { max-width: 100%; } /* 모바일에서는 카드들을 세로로 정렬 */
+        }
     </style>
 </head>
 <body>
     <div class="main-layout">
-        <iframe 
-            id="left-iframe" 
-            class="sidebar-iframe" 
-            src="https://ai.okko.kr/bookmark/index1.php" 
-            title="좌측 사이드바">
-        </iframe>
-
         <div class="content-wrapper">
             <div class="container">
                 <div class="main-header">
-                    <h1>구글 TTS 한국어 변환기 (대본 분할 기능 추가)</h1>
-                    <div id="compareTarget" style="text-align: center;"> 
-                        <a href="https://www.youtube.com/@okko-kr" target="_blank">유튜브 알랑가 IT 꿀팁(구글 텍스트 음성변환)</a>
-                    </div>
+                    <h1>구글 TTS 한국어 변환기 (대본 분할 및 고품질 음성)</h1>
                     <p class="app-description" style="margin-top: 8px;">
                         구글의 Text-to-Speech API를 활용하여 텍스트를 자연스러운 한국어 음성으로 변환해보세요. 긴 대본도 자동으로 분할하여 변환합니다.
                     </p>
@@ -202,8 +396,8 @@
                 </div>
 
                 <div id="segmented-texts-container">
-                    <h2>분할된 텍스트 청크 (<5000 바이트)</h2>
-                    <p id="no-segments-message" style="color: #777; margin-top: 15px;">
+                    <h2>분할된 텍스트 청크 (&lt;5000 바이트)</h2>
+                    <p id="no-segments-message" style="color: var(--light-text); margin-top: 15px;">
                         '대본 분할 및 준비' 버튼을 눌러 대본을 분할하세요.
                     </p>
                     </div>
@@ -255,317 +449,31 @@
                 </div>
 
                 <footer>
-                    <p>구글 Text-to-Speech API를 사용하여 제작되었습니다. TTS API 사용은 구글 클라우드 콘솔에서 할당량과 과금 정책을 확인하세요.</p>
+                    <div class="footer-cards">
+                        <div class="footer-card">
+                            <h4>알랑가IT꿀팁 (구글 텍스트투스피치 음성변환툴)</h4>
+                            <p>음성변환툴 - 새로운 기능이 추가되었는지 확인해보세요.</p>
+                            <p style="margin-top: 10px; font-size: 0.8em;"><a href="https://www.youtube.com/channel/YOUR_CHANNEL_ID_HERE" target="_blank" style="color: var(--primary-color); text-decoration: none;">유튜브 채널 바로가기</a></p>
+                        </div>
+                        <div class="footer-card">
+                            <h4>음성 피치 & 속도 조절기</h4>
+                            <p>Chirp 3 HD 고품질 음성은 그대로, 원하는 톤으로 변경해보세요.</p>
+                            <p style="margin-top: 10px; font-size: 0.8em;">다양한 음성 모델로 최적의 음성을 찾아보세요.</p>
+                        </div>
+                    </div>
+                    <p>구글 Text-to-Speech API를 사용하여 제작되었습니다. API 사용량은 구글 클라우드 콘솔에서 확인하세요.</p>
+                    <p style="font-size: 0.75em; margin-top: 5px;"><a href="https://cloud.google.com/text-to-speech/pricing" target="_blank" style="color: var(--primary-color); text-decoration: none;">Google TTS 가격 정책 및 할당량 확인</a></p>
                 </footer>
-            </div> </div> <iframe 
-            id="right-iframe" 
-            class="sidebar-iframe" 
-            src="https://ai.okko.kr/bookmark/index.php" 
-            title="우측 사이드바">
-        </iframe>
-    </div> <script>
-        // 이 안에 모든 JavaScript 코드를 작성할 것입니다.
-        // 기존 ai.okko.kr.html 파일의 synthesizeSpeech_local, base64ToBlob_local 함수와 유틸리티 함수들을 포함합니다.
-
+            </div> </div> </div> <script>
         // 기존 base64ToBlob_local 함수 (변경 없음)
-        function base64ToBlob_local(_0x250c9e,_0xe43810){const _0x284da4=a0_0x34c5;try{const _0x12ece4=atob(_0x250c9e),_0x38c40b=[];for(let _0x5eeb5f=0x0;_0x5eeb5f<_0x12ece4[_0x284da4(0x1f3)];_0x5eeb5f+=0x200){const _0x52e634=_0x12ece4[_0x284da4(0x205)](_0x5eeb5f,_0x5eeb5f+0x200),_0x254127=new Array(_0x52e634[_0x284da4(0x1f3)]);for(let _0x2850c0=0x0;_0x2850c0<_0x52e634['length'];_0x2850c0++){_0x254127[_0x2850c0]=_0x52e634[_0x284da4(0x204)](_0x2850c0);}const _0x214e00=new Uint8Array(_0x254127);_0x38c40b['push'](_0x214e00);}return new Blob(_0x38c40b,{'type':_0xe43810});}catch(_0x204b62){return console[_0x284da4(0x203)]('Error\x20in\x20base64ToBlob_local:',_0x204b62),null;}}
+        function base64ToBlob_local(_0x250c9e,_0xe43810){const _0x284da4=a0_0x34c5;try{const _0x12ece4=atob(_0x250c9e),_0x38c40b=[];for(let _0x5eeb5f=0x0;_0x5eeb5f<_0x12ece4[_0x284da4(0x1f3)];_0x5eeb5f+=0x200){const _0x52e634=_0x12ece4[_0x284da4(0x205)](_0x5eeb5f,_0x5eeb5f+0x200),_0x254127=new Array(_0x52e634[_0x284da4(0x1f3)]);for(let _0x2850c0=0x0;_0x2850c0<_0x52e634['length'];_0x2850c0++){_0x254127[_0x2850c0]=_0x52e634[_0x284da4(0x204)](_0x2850c0);}const _0x214e00=new Uint8Array(_0x254127);_0x38c40b['push'](_0x214e00);}return new Blob(_0x38c40b,{'type':_0xe43810});}catch(_0x204b62){return console[_0x284da4(0x203)]('Error\\x20in\\x20base64ToBlob_local:',_0x204b62),null;}}
 
         // 기존 synthesizeSpeech_local 함수 (변경 없음)
-        async function synthesizeSpeech_local(_0x3510d9,_0x11db89){const _0x1553d3=a0_0x34c5,{textToConvert:_0x185084,inputType:_0x175e7d,voice:_0x110719,rate:_0x6cc6f1,pitch:_0x35bc1f,volumeGainDb:_0x2b41fb,isChirpModel:_0x78887a}=_0x11db89;let _0x49336f={};if(_0x175e7d===_0x1553d3(0x1f5)){if(!_0x185084)return{'error':_0x1553d3(0x1f2)};_0x49336f[_0x1553d3(0x1f5)]=_0x185084;}else{if(_0x175e7d===_0x1553d3(0x1ee)){if(!_0x185084)return{'error':_0x1553d3(0x1f4)};if(!_0x185084[_0x1553d3(0x1ed)]('<speak>')||!_0x185084[_0x1553d3(0x1f6)](_0x1553d3(0x20b)))return{'error':_0x1553d3(0x1fd)};_0x49336f[_0x1553d3(0x1ee)]=_0x185084;}else return{'error':'알\x20수\x20없는\x20입력\x20타입입니다.'};}const _0x39fd65=_0x78887a?_0x1553d3(0x1fb):'v1',_0x27c93b='https://texttospeech.googleapis.com/'+_0x39fd65+_0x1553d3(0x208)+_0x3510d9,_0xc278e2={'input':_0x49336f,'voice':{'languageCode':_0x1553d3(0x1f0),'name':_0x110719},'audioConfig':{'audioEncoding':'MP3','speakingRate':_0x6cc6f1,'volumeGainDb':_0x2b41fb}};!_0x78887a&&_0xc278e2[_0x1553d3(0x1f7)]&&(_0xc278e2[_0x1553d3(0x1f7)][_0x1553d3(0x1fe)]=_0x35bc1f);try{const _0x43200b=await fetch(_0x27c93b,{'method':'POST','headers':{'Content-Type':'application/json'},'body':JSON[_0x1553d3(0x1ef)](_0xc278e2)}),_0x8012ed=await _0x43200b['json']();if(!_0x43200b['ok']){const _0x52579b=_0x8012ed[_0x1553d3(0x203)]&&_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]?_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]:_0x1553d3(0x1f1);return console[_0x1553d3(0x203)](_0x1553d3(0x1f8),_0x8012ed),{'error':_0x1553d3(0x1f9)+_0x52579b+'\x20(코드:\x20'+_0x43200b['status']+')','details':_0x8012ed};}if(!_0x8012ed[_0x1553d3(0x201)])return{'error':_0x1553d3(0x1ff)};return{'audioContent':_0x8012ed[_0x1553d3(0x201)]};}catch(_0xfd9d59){return console['error'](_0x1553d3(0x1ec),_0xfd9d59),{'error':_0x1553d3(0x206)+_0xfd9d59[_0x1553d3(0x209)]};}}
+        async function synthesizeSpeech_local(_0x3510d9,_0x11db89){const _0x1553d3=a0_0x34c5,{textToConvert:_0x185084,inputType:_0x175e7d,voice:_0x110719,rate:_0x6cc6f1,pitch:_0x35bc1f,volumeGainDb:_0x2b41fb,isChirpModel:_0x78887a}=_0x11db89;let _0x49336f={};if(_0x175e7d===_0x1553d3(0x1f5)){if(!_0x185084)return{'error':_0x1553d3(0x1f2)};_0x49336f[_0x1553d3(0x1f5)]=_0x185084;}else{if(_0x175e7d===_0x1553d3(0x1ee)){if(!_0x185084)return{'error':_0x1553d3(0x1f4)};if(!_0x185084[_0x1553d3(0x1ed)]('<speak>')||!_0x185084[_0x1553d3(0x1f6)](_0x1553d3(0x20b)))return{'error':_0x1553d3(0x1fd)};_0x49336f[_0x1553d3(0x1ee)]=_0x185084;}else return{'error':'알\\x20수\\x20없는\\x20입력\\x20타입입니다.'};}const _0x39fd65=_0x78887a?_0x1553d3(0x1fb):'v1',_0x27c93b='https://texttospeech.googleapis.com/'+_0x39fd65+_0x1553d3(0x208)+_0x3510d9,_0xc278e2={'input':_0x49336f,'voice':{'languageCode':_0x1553d3(0x1f0),'name':_0x110719},'audioConfig':{'audioEncoding':'MP3','speakingRate':_0x6cc6f1,'volumeGainDb':_0x2b41fb}};!_0x78887a&&_0xc278e2[_0x1553d3(0x1f7)]&&(_0xc278e2[_0x1553d3(0x1f7)][_0x1553d3(0x1fe)]=_0x35bc1f);try{const _0x43200b=await fetch(_0x27c93b,{'method':'POST','headers':{'Content-Type':'application/json'},'body':JSON[_0x1553d3(0x1ef)](_0xc278e2)}),_0x8012ed=await _0x43200b['json']();if(!_0x43200b['ok']){const _0x52579b=_0x8012ed[_0x1553d3(0x203)]&&_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]?_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]:_0x1553d3(0x1f1);return console[_0x1553d3(0x203)](_0x1553d3(0x1f8),_0x8012ed),{'error':_0x1553d3(0x1f9)+_0x52579b+'\\x20(코드:\\x20'+_0x43200b['status']+')','details':_0x8012ed};}if(!_0x8012ed[_0x1553d3(0x201)])return{'error':_0x1553d3(0x1ff)};return{'audioContent':_0x8012ed[_0x1553d3(0x201)]};}catch(_0xfd9d59){return console['error'](_0x1553d3(0x1ec),_0xfd9d59),{'error':_0x1553d3(0x206)+_0xfd9d59[_0x1553d3(0x209)]};}}
 
-        // 기존 난독화된 유틸리티 함수들 (필요시 원래 스크립트 파일에서 복사)
-        // 안전한 변환을 위해 필요한 유틸리티 함수들을 여기에 추가합니다.
-        (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqGqvbjioYALoYYRsdSI6tTJkG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNjVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMcdRSjZSG53TLOJSIRxRI4JRI6qU','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
-        // 여기까지 기존 스크립트의 난독화된 유틸리티 코드
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const apiKeyInput = document.getElementById('api-key');
-            const toggleApiKeyVisibilityBtn = document.getElementById('toggle-api-key-visibility');
-            const originalTranscriptInput = document.getElementById('original-transcript');
-            const originalTranscriptCounter = document.getElementById('original-transcript-counter');
-            const processTranscriptBtn = document.getElementById('process-transcript-btn');
-            const segmentedTextsContainer = document.getElementById('segmented-texts-container');
-            const noSegmentsMessage = document.getElementById('no-segments-message');
-
-            const voiceSelect = document.getElementById('voice-select');
-            const rateSlider = document.getElementById('rate-slider');
-            const rateValueSpan = document.getElementById('rate-value');
-            const pitchSlider = document.getElementById('pitch-slider');
-            const pitchValueSpan = document.getElementById('pitch-value');
-            const volumeSlider = document.getElementById('volume-slider');
-            const volumeValueSpan = document.getElementById('volume-value');
-
-            const MAX_BYTES_PER_CHUNK = 5000; // 최대 바이트 수 제한
-
-            // 1. API 키 로컬 스토리지 관리
-            // 페이지 로드 시 로컬 스토리지에서 API 키 불러오기
-            const savedApiKey = localStorage.getItem('google-tts-api-key');
-            if (savedApiKey) {
-                apiKeyInput.value = savedApiKey;
-            }
-
-            // API 키 입력 시 로컬 스토리지에 저장
-            apiKeyInput.addEventListener('input', () => {
-                localStorage.setItem('google-tts-api-key', apiKeyInput.value);
-            });
-
-            // API 키 가시성 토글
-            toggleApiKeyVisibilityBtn.addEventListener('click', () => {
-                if (apiKeyInput.type === 'password') {
-                    apiKeyInput.type = 'text';
-                    toggleApiKeyVisibilityBtn.textContent = '◉'; // 보이는 상태 표시
-                } else {
-                    apiKeyInput.type = 'password';
-                    toggleApiKeyVisibilityBtn.textContent = '◉'; // 가려진 상태 표시
-                }
-            });
-
-            // 2. 글자 수/바이트 수 카운터 함수
-            function getByteLength(str) {
-                return new TextEncoder().encode(str).length;
-            }
-
-            function updateCounter(textarea, counterDisplay) {
-                const text = textarea.value;
-                const charCount = text.length;
-                const byteCount = getByteLength(text);
-                counterDisplay.textContent = `글자 수: ${charCount} | 바이트 수: ${byteCount}`;
-            }
-
-            // 초기 로드 시 대본 입력란 카운터 업데이트
-            updateCounter(originalTranscriptInput, originalTranscriptCounter);
-
-            // 대본 입력란 내용 변경 시 카운터 업데이트
-            originalTranscriptInput.addEventListener('input', () => {
-                updateCounter(originalTranscriptInput, originalTranscriptCounter);
-            });
-
-            // 3. 음성 설정 슬라이더 값 업데이트
-            rateSlider.addEventListener('input', () => {
-                rateValueSpan.textContent = rateSlider.value;
-            });
-            pitchSlider.addEventListener('input', () => {
-                pitchValueSpan.textContent = pitchSlider.value;
-            });
-            volumeSlider.addEventListener('input', () => {
-                volumeValueSpan.textContent = volumeSlider.value;
-            });
-
-            // 4. 문장 분리 함수 (한국어 특화)
-            function splitIntoSentences(text) {
-                // 문장 끝을 나타내는 정규식: 마침표, 물음표, 느낌표 뒤에 공백이나 줄바꿈이 오는 경우
-                // 또는 따옴표, 괄호 등 뒤에 오는 경우 포함
-                const sentenceRegex = /([.?!]["']?\)?|\n)\s*/g;
-                let sentences = text.split(sentenceRegex).filter(s => s && s.trim() !== '');
-
-                // 정규식 split의 특성상 구분자가 결과 배열에 포함될 수 있으므로, 재조합
-                let finalSentences = [];
-                let currentSentence = '';
-
-                for (let i = 0; i < sentences.length; i++) {
-                    currentSentence += sentences[i];
-                    // 다음 요소가 구분자이거나, 문장 끝에 도달하면
-                    if (i + 1 < sentences.length && sentences[i+1].match(/^[.?!]["']?\)?|\n\s*$/)) {
-                         // 다음 요소가 구분자이면 현재 문장 뒤에 붙여주고 다음 구분자는 건너뛰기
-                         currentSentence += sentences[i+1];
-                         finalSentences.push(currentSentence.trim());
-                         currentSentence = '';
-                         i++; // 다음 구분자 건너뛰기
-                    } else if (i === sentences.length - 1) {
-                         // 마지막 요소는 그대로 추가
-                         finalSentences.push(currentSentence.trim());
-                    }
-                }
-                return finalSentences.filter(s => s.length > 0);
-            }
-
-            // 5. 대본 분할 및 표시 함수
-            processTranscriptBtn.addEventListener('click', () => {
-                const originalText = originalTranscriptInput.value.trim();
-                if (!originalText) {
-                    alert('변환할 대본을 입력해주세요.');
-                    return;
-                }
-
-                const sentences = splitIntoSentences(originalText);
-                let currentChunk = '';
-                let currentChunkByteLength = 0;
-                let chunks = [];
-
-                sentences.forEach((sentence, index) => {
-                    const sentenceByteLength = getByteLength(sentence);
-
-                    // 현재 청크에 이 문장을 추가하면 5000바이트를 초과하는지 확인
-                    // 단, 현재 청크가 비어있고 문장 자체가 5000바이트를 초과하는 경우
-                    // (이 경우 문장이 너무 길어서 5000바이트를 넘어감)
-                    // 또는 현재 청크가 가득 찼는데 다음 문장을 추가하면 넘어가는 경우
-                    if (currentChunkByteLength + sentenceByteLength > MAX_BYTES_PER_CHUNK && currentChunkByteLength > 0) {
-                        chunks.push(currentChunk.trim());
-                        currentChunk = '';
-                        currentChunkByteLength = 0;
-                    }
-                    
-                    // 문장 자체가 5000바이트를 초과하는 경우, 경고하고 해당 문장을 단독 청크로 처리
-                    if (sentenceByteLength > MAX_BYTES_PER_CHUNK) {
-                        alert(`경고: "${sentence.substring(0, 50)}..." 문장이 ${MAX_BYTES_PER_CHUNK} 바이트를 초과합니다. 이 문장은 단독 청크로 처리됩니다.`);
-                        chunks.push(sentence.trim());
-                        currentChunk = ''; // 현재 청크 초기화
-                        currentChunkByteLength = 0;
-                    } else {
-                        currentChunk += (currentChunk.length > 0 ? ' ' : '') + sentence; // 문장 사이에 공백 추가
-                        currentChunkByteLength += (currentChunk.length > 0 ? getByteLength(' ') : 0) + sentenceByteLength; // 바이트 길이 업데이트
-                    }
-                });
-
-                // 마지막 남은 청크 추가
-                if (currentChunk.length > 0) {
-                    chunks.push(currentChunk.trim());
-                }
-
-                displaySegmentedTexts(chunks);
-            });
-
-            function displaySegmentedTexts(chunks) {
-                segmentedTextsContainer.innerHTML = ''; // 기존 내용 지우기
-                if (chunks.length === 0) {
-                    noSegmentsMessage.style.display = 'block';
-                    return;
-                }
-                noSegmentsMessage.style.display = 'none';
-
-                chunks.forEach((chunk, index) => {
-                    const segmentDiv = document.createElement('div');
-                    segmentDiv.className = 'text-segment';
-                    segmentDiv.dataset.segmentIndex = index; // 인덱스 저장
-
-                    const segmentLabel = document.createElement('label');
-                    segmentLabel.textContent = `청크 ${index + 1} (바이트: ${getByteLength(chunk)})`;
-                    segmentDiv.appendChild(segmentLabel);
-
-                    const textarea = document.createElement('textarea');
-                    textarea.id = `segment-text-${index}`;
-                    textarea.value = chunk;
-                    textarea.readOnly = false; // 사용자가 수정할 수 있도록
-                    segmentDiv.appendChild(textarea);
-
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.className = 'segment-actions';
-                    
-                    const convertBtn = document.createElement('button');
-                    convertBtn.className = 'btn-primary convert-segment-btn';
-                    convertBtn.textContent = '음성 변환';
-                    convertBtn.dataset.segmentId = index;
-                    actionsDiv.appendChild(convertBtn);
-
-                    const downloadBtn = document.createElement('button');
-                    downloadBtn.className = 'btn-secondary download-segment-btn';
-                    downloadBtn.textContent = 'MP3 다운로드';
-                    downloadBtn.dataset.segmentId = index;
-                    downloadBtn.disabled = true; // 변환 후에 활성화
-                    actionsDiv.appendChild(downloadBtn);
-
-                    const statusSpan = document.createElement('span');
-                    statusSpan.className = 'download-status';
-                    statusSpan.id = `status-segment-${index}`;
-                    actionsDiv.appendChild(statusSpan);
-
-                    const audioPlayer = document.createElement('audio');
-                    audioPlayer.controls = true;
-                    audioPlayer.id = `audio-segment-${index}`;
-                    actionsDiv.appendChild(audioPlayer);
-
-
-                    segmentDiv.appendChild(actionsDiv);
-                    segmentedTextsContainer.appendChild(segmentDiv);
-
-                    // 각 텍스트 영역에 대한 카운터 추가 (선택 사항, 필요 시 추가)
-                    // const counterDisplay = document.createElement('div');
-                    // counterDisplay.className = 'char-counter-display';
-                    // segmentDiv.appendChild(counterDisplay);
-                    // updateCounter(textarea, counterDisplay);
-                    // textarea.addEventListener('input', () => updateCounter(textarea, counterDisplay));
-                });
-
-                // 각 세그먼트의 '음성 변환' 버튼에 이벤트 리스너 연결
-                document.querySelectorAll('.convert-segment-btn').forEach(button => {
-                    button.addEventListener('click', async (event) => {
-                        const segmentId = event.target.dataset.segmentId;
-                        const segmentTextarea = document.getElementById(`segment-text-${segmentId}`);
-                        const audioPlayer = document.getElementById(`audio-segment-${segmentId}`);
-                        const downloadBtn = document.querySelector(`.download-segment-btn[data-segment-id="${segmentId}"]`);
-                        const statusSpan = document.getElementById(`status-segment-${segmentId}`);
-
-                        const textToConvert = segmentTextarea.value;
-                        const apiKey = apiKeyInput.value;
-
-                        if (!apiKey) {
-                            alert('API 키를 먼저 입력해주세요.');
-                            return;
-                        }
-                        if (!textToConvert) {
-                            alert('변환할 텍스트를 입력해주세요.');
-                            return;
-                        }
-
-                        statusSpan.textContent = '변환 중...';
-                        statusSpan.className = 'download-status pending';
-                        downloadBtn.disabled = true;
-                        audioPlayer.src = ''; // 기존 오디오 초기화
-
-                        // 현재 전역 설정된 음성 파라미터 가져오기
-                        const voiceName = voiceSelect.value;
-                        const speakingRate = parseFloat(rateSlider.value);
-                        const pitch = parseInt(pitchSlider.value);
-                        const volumeGainDb = parseInt(volumeSlider.value);
-                        const isChirpModel = voiceName.includes('Chirp3');
-
-                        const requestOptions = {
-                            textToConvert: textToConvert,
-                            inputType: 'text', // 항상 일반 텍스트로 처리
-                            voice: voiceName,
-                            rate: speakingRate,
-                            pitch: pitch,
-                            volumeGainDb: volumeGainDb,
-                            isChirpModel: isChirpModel
-                        };
-
-                        try {
-                            const response = await synthesizeSpeech_local(apiKey, requestOptions);
-
-                            if (response.error) {
-                                statusSpan.textContent = `오류: ${response.error}`;
-                                statusSpan.className = 'download-status error';
-                                console.error('TTS 변환 오류:', response.details || response.error);
-                                alert('음성 변환 중 오류가 발생했습니다: ' + response.error);
-                            } else if (response.audioContent) {
-                                const audioBlob = base64ToBlob_local(response.audioContent, 'audio/mpeg');
-                                const audioUrl = URL.createObjectURL(audioBlob);
-                                audioPlayer.src = audioUrl;
-                                audioPlayer.load(); // 오디오 로드
-                                statusSpan.textContent = '변환 완료! 재생 가능';
-                                statusSpan.className = 'download-status success';
-                                downloadBtn.disabled = false;
-                                downloadBtn.onclick = () => {
-                                    const a = document.createElement('a');
-                                    a.href = audioUrl;
-                                    a.download = `chunk_${segmentId + 1}_audio.mp3`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    statusSpan.textContent += ' (다운로드 완료)';
-                                    statusSpan.className = 'download-status success';
-                                };
-                            }
-                        } catch (error) {
-                            statusSpan.textContent = '네트워크 오류 또는 기타 문제';
-                            statusSpan.className = 'download-status error';
-                            console.error('TTS 변환 요청 실패:', error);
-                            alert('음성 변환 요청 중 예상치 못한 오류가 발생했습니다.');
-                        }
-                    });
-                });
-            }
-        });
-    </script> 
+        // 기존 난독화된 유틸리티 함수들
+        (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqGqvbjioYALoYYRsdSI6tTJkG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNjVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMoQWGcdRSjZSG53TLOJSIRxRI4JRI6qU','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
+    </script>
+    <script src="https://ai.okko.kr/bookmark/textro/ui-manager.js"></script> 
 </body>
 </html>
