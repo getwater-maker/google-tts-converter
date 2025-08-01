@@ -319,6 +319,7 @@
         .download-status.success { color: green; font-weight: bold; }
         .download-status.error { color: red; font-weight: bold; }
         .download-status.pending { color: orange; }
+        .download-status.downloaded { color: #007bff; font-weight: bold; }
 
         /* 새로운 푸터 디자인 */
         footer {
@@ -392,8 +393,25 @@
             #segmented-texts-container {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 모바일에서는 1열 */
             }
+            .transcript-input-group {
+                flex-direction: column; /* 모바일에서 세로로 정렬 */
+            }
+            .transcript-input-group > div {
+                width: 100% !important; /* 모바일에서 100% 너비 */
+            }
+        }
+
+        /* 긴 대본 입력창 관련 CSS 수정 */
+        .transcript-input-group {
+            display: flex;
+            gap: 20px;
+        }
+        .transcript-input-group > div {
+            flex: 1; /* flexbox로 각 입력창이 공간을 균등하게 차지 */
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
     <div class="main-layout">
@@ -453,13 +471,22 @@
         </div>
 
         <div class="section-wrapper" id="original-text-section-wrapper">
-            <h2>긴 대본 입력 (자동 분할)</h2>
+            <h2>긴 대본 입력 및 필터링 결과</h2>
             <div id="original-text-section">
-                <div class="form-group">
-                    <label for="original-transcript">전체 대본을 입력하세요 (문장 단위로 자동 분할됩니다)</label>
-                    <textarea id="original-transcript" placeholder="유튜브 영상의 긴 대본 전체를 여기에 붙여넣으세요..."></textarea>
-                    <div class="char-counter-display" id="original-transcript-counter">
-                        글자 수: 0 | 바이트 수: 0
+                <div class="transcript-input-group">
+                    <div class="form-group">
+                        <label for="original-transcript">전체 대본 입력</label>
+                        <textarea id="original-transcript" placeholder="유튜브 영상의 긴 대본 전체를 여기에 붙여넣으세요..."></textarea>
+                        <div class="char-counter-display" id="original-transcript-counter">
+                            글자 수: 0 | 바이트 수: 0
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="filtered-transcript">결과물 (필터링된 대본)</label>
+                        <textarea id="filtered-transcript" placeholder="필터링된 대본이 여기에 표시됩니다." readonly></textarea>
+                        <div class="char-counter-display" id="filtered-transcript-counter">
+                            글자 수: 0 | 바이트 수: 0
+                        </div>
                     </div>
                 </div>
                 <div class="btn-group">
@@ -474,7 +501,7 @@
                 <p id="no-segments-message" style="color: var(--light-text); margin-top: 15px; grid-column: 1 / -1; text-align: center;">
                     '긴 대본 입력' 섹션에서 '대본 분할 및 준비' 버튼을 눌러 대본을 분할하세요.
                 </p>
-                </div>
+            </div>
         </div>
 
         <div class="section-wrapper" id="api-key-section">
@@ -588,14 +615,13 @@
             </div>
         </footer>
     </div> <script>
-        // 수정된 base64ToBlob_local 함수 (브라우저 내장 atob 사용)
+        // base64ToBlob_local 함수 (브라우저 내장 atob 사용)
         function base64ToBlob_local(base64Data, contentType) {
             try {
-                // 이 부분이 변경되었습니다. 내장 atob() 함수를 직접 사용합니다.
                 const byteCharacters = atob(base64Data);
                 const byteArrays = [];
 
-                for (let offset = 0; offset < byteCharacters.length; offset += 512) { // 512 대신 200이었던 부분을 512로 변경 (더 큰 청크로 처리)
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
                     const slice = byteCharacters.slice(offset, offset + 512);
                     const byteNumbers = new Array(slice.length);
                     for (let i = 0; i < slice.length; i++) {
@@ -608,17 +634,75 @@
                 return new Blob(byteArrays, { type: contentType });
             } catch (error) {
                 console.error('Error in base64ToBlob_local (native atob or blob creation):', error, 'base64Data length:', base64Data ? base64Data.length : 0);
-                // 추가 디버깅을 위해 base64Data의 일부를 로깅합니다.
                 console.error('Problematic base64Data start:', base64Data ? base64Data.substring(0, 100) + '...' : 'N/A');
                 return null;
             }
         }
+        
+        // synthesizeSpeech_local 함수 (수정된 클린 코드)
+        async function synthesizeSpeech_local(apiKey, options) {
+            const { textToConvert, inputType, voice, rate, pitch, volumeGainDb, isChirpModel } = options;
+            
+            let input = {};
+            if (inputType === 'text') {
+                if (!textToConvert) return { 'error': '변환할 텍스트가 없습니다.' };
+                input.text = textToConvert;
+            } else if (inputType === 'ssml') {
+                if (!textToConvert) return { 'error': '변환할 SSML 텍스트가 없습니다.' };
+                if (!textToConvert.includes('<speak>') || !textToConvert.includes('</speak>')) {
+                    return { 'error': 'SSML 텍스트는 <speak>...</speak> 태그로 감싸야 합니다.' };
+                }
+                input.ssml = textToConvert;
+            } else {
+                return { 'error': '알 수 없는 입력 타입입니다.' };
+            }
 
-        // 기존 synthesizeSpeech_local 함수 (난독화된 부분은 그대로 유지)
-        async function synthesizeSpeech_local(_0x3510d9,_0x11db89){const _0x1553d3=a0_0x34c5,{textToConvert:_0x185084,inputType:_0x175e7d,voice:_0x110719,rate:_0x6cc6f1,pitch:_0x35bc1f,volumeGainDb:_0x2b41fb,isChirpModel:_0x78887a}=_0x11db89;let _0x49336f={};if(_0x175e7d===_0x1553d3(0x1f5)){if(!_0x185084)return{'error':_0x1553d3(0x1f2)};_0x49336f[_0x1553d3(0x1f5)]=_0x185084;}else{if(_0x175e7d===_0x1553d3(0x1ee)){if(!_0x185084)return{'error':_0x1553d3(0x1f4)};if(!_0x185084[_0x1553d3(0x1ed)]('<speak>')||!_0x185084[_0x1553d3(0x1f6)](_0x1553d3(0x20b)))return{'error':_0x1553d3(0x1fd)};_0x49336f[_0x1553d3(0x1ee)]=_0x185084;}else return{'error':'알\\x20수\\x20없는\\x20입력\\x20타입입니다.'};}const _0x39fd65=_0x78887a?_0x1553d3(0x1fb):'v1',_0x27c93b='https://texttospeech.googleapis.com/'+_0x39fd65+_0x1553d3(0x208)+_0x3510d9,_0xc278e2={'input':_0x49336f,'voice':{'languageCode':_0x1553d3(0x1f0),'name':_0x110719},'audioConfig':{'audioEncoding':'MP3','speakingRate':_0x6cc6f1,'volumeGainDb':_0x2b41fb}};!_0x78887a&&_0xc278e2[_0x1553d3(0x1f7)]&&(_0xc278e2[_0x1553d3(0x1f7)][_0x1553d3(0x1fe)]=_0x35bc1f);try{const _0x43200b=await fetch(_0x27c93b,{'method':'POST','headers':{'Content-Type':'application/json'},'body':JSON[_0x1553d3(0x1ef)](_0xc278e2)}),_0x8012ed=await _0x43200b['json']();if(!_0x43200b['ok']){const _0x52579b=_0x8012ed[_0x1553d3(0x203)]&&_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]?_0x8012ed[_0x1553d3(0x203)][_0x1553d3(0x209)]:_0x1553d3(0x1f1);return console[_0x1553d3(0x203)](_0x1553d3(0x1f8),_0x8012ed),{'error':_0x1553d3(0x1f9)+_0x52579b+'\\x20(코드:\\x20'+_0x43200b['status']+')','details':_0x8012ed};}if(!_0x8012ed[_0x1553d3(0x201)])return{'error':_0x1553d3(0x1ff)};return{'audioContent':_0x8012ed[_0x1553d3(0x201)]};}catch(_0xfd9d59){return console['error'](_0x1553d3(0x1ec),_0xfd9d59),{'error':_0x1553d3(0x206)+_0xfd9d59[_0x1553d3(0x209)]};}}
+            const apiVersion = isChirpModel ? 'v1beta1' : 'v1';
+            const apiUrl = `https://texttospeech.googleapis.com/${apiVersion}/text:synthesize?key=${apiKey}`;
 
-        // 기존 난독화된 유틸리티 함수들 (코드 유지) - synthesizeSpeech_local에서 사용됨
-        (function(_0x1c09aa,_0x173db3){const _0x1a15fd=a0_0x34c5,_0x591b8a=_0x1c09aa();while(!![]){try{const _0x4094cd=-parseInt(_0x1a15fd(0x1e9))/0x1+parseInt(_0x1a15fd(0x1ea))/0x2+parseInt(_0x1a15fd(0x207))/0x3+-parseInt(_0x1a15fd(0x202))/0x4+-parseInt(_0x1a15fd(0x20a))/0x5*(parseInt(_0x1a15fd(0x1fa))/0x6)+parseInt(_0x1a15fd(0x1eb))/0x7*(-parseInt(_0x1a15fd(0x200))/0x8)+parseInt(_0x1a15fd(0x1fc))/0x9;if(_0x4094cd===_0x173db3)break;else _0x591b8a['push'](_0x591b8a['shift']());}catch(_0x5efc9c){_0x591b8a['push'](_0x591b8a['shift']());}}}(a0_0x4dd2,0x23229));function a0_0x34c5(_0x56e08f,_0x13f962){const _0x4dd2c6=a0_0x4dd2();return a0_0x34c5=function(_0x34c5e7,_0xb063c7){_0x34c5e7=_0x34c5e7-0x1e9;let _0x4b5dcf=_0x4dd2c6[_0x34c5e7];if(a0_0x34c5['rqwccm']===undefined){var _0x4eca2f=function(_0x3510d9){const _0x11db89='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x185084='',_0x175e7d='';for(let _0x110719=0x0,_0x6cc6f1,_0x35bc1f,_0x2b41fb=0x0;_0x35bc1f=_0x3510d9['charAt'](_0x2b41fb++);~_0x35bc1f&&(_0x6cc6f1=_0x110719%0x4?_0x6cc6f1*0x40+_0x35bc1f:_0x35bc1f,_0x110719++%0x4)?_0x185084+=String['fromCharCode'](0xff&_0x6cc6f1>>(-0x2*_0x110719&0x6)):0x0){_0x35bc1f=_0x11db89['indexOf'](_0x35bc1f);}for(let _0x78887a=0x0,_0x49336f=_0x185084['length'];_0x78887a<_0x49336f;_0x78887a++){_0x175e7d+='%'+('00'+_0x185084['charCodeAt'](_0x78887a)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x175e7d);};a0_0x34c5['lbxaFa']=_0x4eca2f,_0x56e08f=arguments,a0_0x34c5['rqwccm']=!![];}const _0x42df47=_0x4dd2c6[0x0],_0x18aecf=_0x34c5e7+_0x42df47,_0x6378b8=_0x56e08f[_0x18aecf];return!_0x6378b8?(_0x4b5dcf=a0_0x34c5['lbxaFa'](_0x4b5dcf),_0x56e08f[_0x18aecf]=_0x4b5dcf):_0x4b5dcf=_0x6378b8,_0x4b5dcf;},a0_0x34c5(_0x56e08f,_0x13f962);}function a0_0x4dd2(){const _0xbd4b7c=['u1nntoYDGca8C3bLywS+io2dNoQ3UoUHNcdSI5ZSNPhTLzJQS6aGpc9ZCgvHAZ4G7yoC6RE466gCioUbNEUcMoYvVcdTLANRI4JRI6qU','CgL0y2G','qvbjioYDKEUlTEYxKcdSMktRLjtSMkqG7l2y7ywq7lIG6RcaioYxHUYkTEUlIoUlPc4','offUCg11sq','yxvKAw9dB250zw50','mZm5odH4AxfUy3e','zxjYB3i','y2HHCKnVzgvbDa','C2XPy2u','64sK7yQ47jUm7ygSioYyPoULMcdRMjdRIPqG6ia','mZm1nZy2uvzeAKfe','l3rLEhq6C3LUDgHLC2L6zt9RzxK9','BwvZC2fNzq','otKZntCWsM9UvM1W','pc9ZCgvHAZ4','mtqWotHIz1jZq1u','mtK0mZbyChvSvhe','mtKZmZKZowTUEeX1Ea','tMv0D29YAYbVCIbgzxrJAcbfCNjVCIbPBIbZEw50AgvZAxPLu3bLzwnOx2XVy2fSoG','C3rHCNrZv2L0Aa','C3nTBa','C3rYAw5NAwz5','A28Ts1i','qvbjioYyPoULMoQWGcdRSjZSG53TLOJSIRxRI4JRI6qU','7ywn7iQK7yQ466w8ioYEHEUGPE2vToYJVoYeUoYALc4','BgvUz3rO','u1nntoYDHcdSNOxROkxTLBtSO7ZSHlJSMPqU','Dgv4Da','zw5KC1DPDgG','yxvKAw9dB25MAwC','qvbjievYCM9YigLUihn5BNrOzxnPEMvtCgvLy2HFBg9JywW6','qvbjioYyPoULMdOG','nLrLu0LcqW','DJfIzxrHmq','ndy3odC1ohzLBwLLua'];a0_0x4dd2=function(){return _0xbd4b7c;};return a0_0x4dd2();}
+            const requestBody = {
+                input: input,
+                voice: {
+                    languageCode: 'ko-KR',
+                    name: voice
+                },
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speakingRate: rate,
+                    volumeGainDb: volumeGainDb
+                }
+            };
+            
+            if (!isChirpModel) {
+                 requestBody.audioConfig.pitch = pitch;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                const responseJson = await response.json();
+
+                if (!response.ok) {
+                    const errorMessage = responseJson.error && responseJson.error.message ? responseJson.error.message : '알 수 없는 오류가 발생했습니다.';
+                    console.error('TTS API 응답 오류:', responseJson);
+                    return { 'error': `API 오류: ${errorMessage} (코드: ${response.status})`, 'details': responseJson };
+                }
+
+                if (!responseJson.audioContent) {
+                    return { 'error': 'API로부터 유효한 오디오 콘텐츠를 받지 못했습니다.' };
+                }
+
+                return { 'audioContent': responseJson.audioContent };
+
+            } catch (error) {
+                console.error('네트워크 또는 알 수 없는 오류:', error);
+                return { 'error': `네트워크 오류: ${error.message}` };
+            }
+        }
+
 
         // 새롭게 추가된 UI 관리 및 기능 로직
         document.addEventListener('DOMContentLoaded', () => {
@@ -687,6 +771,15 @@
             updateCharByteCounter('general-text-input', 'general-text-input-counter');
             updateCharByteCounter('ssml-input', 'ssml-input-counter');
             updateCharByteCounter('original-transcript', 'original-transcript-counter');
+            updateCharByteCounter('filtered-transcript', 'filtered-transcript-counter'); // 결과물 카운터 추가
+
+            // 긴 대본 입력 시 결과물 텍스트 영역에 자동 반영
+            let originalTranscriptInput = document.getElementById('original-transcript');
+            let filteredTranscriptInput = document.getElementById('filtered-transcript');
+            originalTranscriptInput.addEventListener('input', () => {
+                filteredTranscriptInput.value = smartFilterText(originalTranscriptInput.value);
+                filteredTranscriptInput.dispatchEvent(new Event('input')); // 카운터 업데이트
+            });
 
             // --- SSML 태그 삽입 ---
             document.querySelectorAll('.ssml-tag').forEach(tagButton => {
@@ -703,25 +796,20 @@
                         case 'emphasis':
                         case 'prosody':
                         case 'say-as':
-                            // 예시: <emphasis level="strong"></emphasis>
-                            // <prosody rate="slow"></prosody>
-                            // <say-as interpret-as="date" format="ymd"></say-as>
-                            tagText = `<${tag} ${value || ''}></${tag}>`; // value가 없을 경우를 대비하여 빈 문자열 추가
+                            tagText = `<${tag} ${value || ''}>${ssmlInput.value.substring(ssmlInput.selectionStart, ssmlInput.selectionEnd)}</${tag}>`;
                             break;
                         default:
                             tagText = `<${tag}></${tag}>`;
                     }
-
+                    
                     const start = ssmlInput.selectionStart;
                     const end = ssmlInput.selectionEnd;
                     const text = ssmlInput.value;
 
                     if (tag === 'break') {
-                        // break 태그는 항상 빈 태그이므로 선택 영역 무시
                         ssmlInput.value = text.substring(0, start) + tagText + text.substring(end);
                         ssmlInput.selectionStart = ssmlInput.selectionEnd = start + tagText.length;
                     } else {
-                        // 다른 태그는 선택 영역을 감싸거나, 커서 위치에 삽입
                         const selectedText = text.substring(start, end);
                         if (selectedText) {
                             tagText = `<${tag} ${value || ''}>${selectedText}</${tag}>`;
@@ -855,10 +943,9 @@
 
 
             // --- 음성 변환 공통 함수 ---
-            // segmentedBlobs 배열 추가 (모든 MP3 일괄 다운로드를 위함)
             let segmentedBlobs = [];
 
-            async function commonConvertAndDownload(textToConvert, inputType, statusElement, audioPlayerElement, downloadButtonElement, filenamePrefix) {
+            async function commonConvertAndDownload(textToConvert, inputType, statusElement, audioPlayerElement, downloadButtonElement, filenamePrefix, isSegment = false) {
                 const apiKey = apiKeyInput.value;
                 if (!apiKey) {
                     statusElement.textContent = '오류: 구글 TTS API 키를 입력해주세요.';
@@ -869,6 +956,14 @@
                 statusElement.textContent = '음성 변환 중...';
                 statusElement.style.color = 'orange';
                 downloadButtonElement.disabled = true;
+                
+                if (isSegment) {
+                    // 개별 다운로드 버튼의 상태를 초기화
+                    const index = downloadButtonElement.dataset.index;
+                    const downloadStatusSpan = document.getElementById(`segment-status-${index}`);
+                    downloadStatusSpan.classList.remove('downloaded');
+                    downloadStatusSpan.textContent = '음성 변환 중...';
+                }
 
                 const voiceSelect = document.getElementById('voice-select');
                 const voiceName = voiceSelect.value;
@@ -903,11 +998,10 @@
                         const errorMessage = '오류: API로부터 유효한 오디오 콘텐츠(base64 문자열)를 받지 못했습니다. API 응답을 확인하세요.';
                         statusElement.textContent = errorMessage;
                         statusElement.style.color = 'red';
-                        console.error(errorMessage, '수신된 응답 전체:', response); // 응답 전체 로그
+                        console.error(errorMessage, '수신된 응답 전체:', response);
                         return { success: false, error: errorMessage };
                     }
 
-                    console.log('Received audioContent (base64, first 50 chars):', response.audioContent.substring(0, 50) + '...'); // 추가된 로그
                     const audioBlob = base64ToBlob_local(response.audioContent, 'audio/mpeg');
                     
                     if (!audioBlob || !(audioBlob instanceof Blob)) {
@@ -918,20 +1012,19 @@
                         return { success: false, error: errorMessage };
                     }
 
-                    console.log('Generated audioBlob:', audioBlob); // 추가된 로그
-
                     const audioUrl = URL.createObjectURL(audioBlob);
                     audioPlayerElement.src = audioUrl;
                     audioPlayerElement.load();
-                    audioPlayerElement.play();
+                    // 자동 재생 방지: audioPlayerElement.play(); 호출 제거
+                    // 자동 재생을 원하는 경우 이 줄의 주석을 해제하세요.
+                    // audioPlayerElement.play(); 
 
                     statusElement.textContent = '음성 변환 완료!';
                     statusElement.style.color = 'green';
                     downloadButtonElement.disabled = false;
-
-                    // 파일 이름 생성 (날짜 및 시간 추가)
-                    const now = new Date();
-                    const fileName = `${filenamePrefix}_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+                    
+                    // 파일 이름 생성
+                    const fileName = filenamePrefix;
                     downloadButtonElement.onclick = () => {
                         const a = document.createElement('a');
                         a.href = audioUrl;
@@ -939,10 +1032,16 @@
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
+                        
+                        if (isSegment) {
+                             const downloadStatusSpan = document.getElementById(`segment-status-${downloadButtonElement.dataset.index}`);
+                             downloadStatusSpan.textContent = '다운로드 완료!';
+                             downloadStatusSpan.classList.add('downloaded');
+                        }
                     };
 
                     // 기록 저장 (긴 대본은 개별 세그먼트만 저장)
-                    if (!filenamePrefix.startsWith('변환된_분할된대본')) { // 분할된 대본이 아닌 경우에만 기록에 저장
+                    if (!isSegment) {
                         history.unshift({ // 최신 기록을 맨 앞에 추가
                             text: textToConvert,
                             inputType: inputType,
@@ -951,14 +1050,14 @@
                             pitch: pitch,
                             volumeGainDb: volumeGainDb,
                             audioContent: response.audioContent, // base64 인코딩된 오디오 데이터 저장
-                            fileName: fileName,
+                            fileName: filenamePrefix,
                             timestamp: Date.now()
                         });
                         // 최대 기록 수 제한
                         history = history.slice(0, parseInt(maxHistoryInput.value));
                         saveHistory();
                     }
-                    return { success: true, audioBlob: audioBlob }; // Blob 반환
+                    return { success: true, audioBlob: audioBlob, filename: `${fileName}.mp3` };
 
                 } catch (error) {
                     statusElement.textContent = `네트워크 오류: ${error.message}`;
@@ -1006,69 +1105,74 @@
 
 
             // --- 긴 대본 처리 기능 ---
-            const originalTranscriptInput = document.getElementById('original-transcript');
-            const processTranscriptBtn = document.getElementById('process-transcript-btn');
-            const segmentedTextsContainer = document.getElementById('segmented-texts-container');
-            const noSegmentsMessage = document.getElementById('no-segments-message');
-            const convertAllSegmentsBtn = document.getElementById('convert-all-segments-btn');
-            const downloadAllSegmentsBtn = document.getElementById('download-all-segments-btn');
-            const overallStatus = document.getElementById('overall-status');
+            let processTranscriptBtn = document.getElementById('process-transcript-btn');
+            let segmentedTextsContainer = document.getElementById('segmented-texts-container');
+            let noSegmentsMessage = document.getElementById('no-segments-message');
+            let convertAllSegmentsBtn = document.getElementById('convert-all-segments-btn');
+            let downloadAllSegmentsBtn = document.getElementById('download-all-segments-btn');
+            let overallStatus = document.getElementById('overall-status');
 
-            const MAX_BYTE_SIZE = 4900; // Google API 제한 5000 바이트보다 약간 작게 설정
-            let currentTextChunks = []; // 분할된 텍스트 청크를 저장할 배열
+            const MAX_BYTE_SIZE = 4900;
+            let currentTextChunks = [];
 
             function getByteLength(str) {
                 return new TextEncoder().encode(str).length;
             }
-
-            // 기존 splitTextIntoChunks를 재활용하여 바이트 제한에 맞춰 문장 분할
-            function splitIntoByteLimitedChunks(text) {
-                const sentences = text.match(/[^.!?。？！]+[.!?。？！]?/g) || [text];
+            
+            // 기존 splitIntoByteLimitedChunks를 대체할 새로운 줄 단위 분할 함수
+            function splitIntoLineChunks(text) {
+                const lines = text.split('\n');
                 const chunks = [];
                 let currentChunk = '';
                 let currentChunkByteLength = 0;
 
-                sentences.forEach(sentence => {
-                    const sentenceByteLength = getByteLength(sentence);
-
-                    if (sentenceByteLength > MAX_BYTE_SIZE) {
-                        // 문장 자체가 너무 길 경우, 강제 분할 (워드 단위로 시도)
-                        let tempSentence = sentence;
-                        while (getByteLength(tempSentence) > MAX_BYTE_SIZE) {
-                            let splitPoint = tempSentence.substring(0, MAX_BYTE_SIZE).lastIndexOf(' ');
+                lines.forEach(line => {
+                    // 각 줄의 바이트 길이를 계산
+                    const lineByteLength = getByteLength(line + '\n'); // 줄 바꿈도 길이에 포함
+                    
+                    // 현재 청크에 줄을 추가했을 때 바이트 제한을 초과하는지 확인
+                    if (currentChunkByteLength + lineByteLength > MAX_BYTE_SIZE && currentChunk.length > 0) {
+                        // 초과하면 현재까지의 청크를 저장하고 새로운 청크 시작
+                        chunks.push(currentChunk.trim());
+                        currentChunk = '';
+                        currentChunkByteLength = 0;
+                    }
+                    
+                    // 만약 한 줄 자체가 바이트 제한을 초과하는 경우, 해당 줄을 잘라서 추가
+                    if (lineByteLength > MAX_BYTE_SIZE) {
+                        let tempLine = line;
+                        while (getByteLength(tempLine) > MAX_BYTE_SIZE) {
+                            let splitPoint = tempLine.substring(0, MAX_BYTE_SIZE).lastIndexOf(' ');
                             if (splitPoint === -1 || splitPoint === 0) {
-                                // 공백이 없거나 첫 글자라면, 강제 분할
                                 splitPoint = MAX_BYTE_SIZE;
                             }
-                            const part = tempSentence.substring(0, splitPoint);
+                            const part = tempLine.substring(0, splitPoint);
                             chunks.push(part.trim());
-                            tempSentence = tempSentence.substring(splitPoint).trim();
+                            tempLine = tempLine.substring(splitPoint).trim();
                         }
-                        if (tempSentence.length > 0) {
-                            chunks.push(tempSentence.trim());
+                        if (tempLine.length > 0) {
+                             currentChunk += tempLine.trim() + '\n';
+                             currentChunkByteLength += getByteLength(tempLine.trim() + '\n');
                         }
                     } else {
-                        if (currentChunkByteLength + sentenceByteLength <= MAX_BYTE_SIZE) {
-                            currentChunk += sentence;
-                            currentChunkByteLength += sentenceByteLength;
-                        } else {
-                            chunks.push(currentChunk.trim());
-                            currentChunk = sentence;
-                            currentChunkByteLength = sentenceByteLength;
-                        }
+                        // 초과하지 않으면 현재 청크에 줄 추가
+                        currentChunk += line + '\n';
+                        currentChunkByteLength += lineByteLength;
                     }
                 });
 
+                // 마지막 남은 청크가 있으면 추가
                 if (currentChunk.length > 0) {
                     chunks.push(currentChunk.trim());
                 }
+                
                 return chunks;
             }
 
 
-            // 새롭게 추가된 스마트 분할 함수
-            function smartSplitAndChunk(fullText) {
-                // 1. 초기 정리: '!!'를 '!'로 변경 (기존 유지)
+            // 수정된 스마트 분할 함수
+            function smartFilterText(fullText) {
+                // 1. 초기 정리: '!!'를 '!'로 변경
                 let processedText = fullText.replace(/!!/g, '!');
                 
                 // 2. 새로운 정리: 따옴표 제거, 특정 문자열 제거
@@ -1076,45 +1180,45 @@
                 processedText = processedText.replace(/---|(\*\*)|,/g, ''); // ---, **, , 제거
 
                 const allSegments = [];
-
+                
                 // 3. '##'를 기준으로 1차 분할
-                // '##' 바로 뒤에 숫자가 오는 패턴을 고려하여 분할 (예: "## 1", "## 2")
                 const majorSections = processedText.split(/(?:\n|^)##\s*\d*(?:[^\n]*)\n/);
 
-                majorSections.forEach((sectionContent, index) => {
+                majorSections.forEach(sectionContent => {
                     if (sectionContent.trim() === '') return; // 빈 섹션 건너뛰기
 
-                    // '##' 섹션 내부에서 '#으로 시작하는 줄 필터링 (새로운 조건 반영)
+                    // '##' 섹션 내부에서 '#으로 시작하는 줄 필터링
                     const filteredLines = sectionContent.split('\n').filter(line => {
                         const trimmedLine = line.trim();
-                        // "#으로 시작하는 줄은 제외, ##로 시작하는 줄은 유지
                         return !(trimmedLine.startsWith('"#') || (trimmedLine.startsWith('#') && !trimmedLine.startsWith('##')));
                     });
+                    
+                    // 줄 바꿈이 유지된 상태로 다시 합치기
                     const cleanedSection = filteredLines.join('\n').trim();
 
                     if (cleanedSection) {
-                        // 필터링된 섹션 내용을 문장 및 바이트 기준으로 재분할
-                        const subChunks = splitIntoByteLimitedChunks(cleanedSection);
-                        allSegments.push(...subChunks);
+                        allSegments.push(cleanedSection);
                     }
                 });
-                return allSegments;
+                return allSegments.join('\n'); // 모든 필터링된 섹션을 줄 바꿈으로 연결
             }
 
+
+            // 분할 및 UI 생성
             processTranscriptBtn.addEventListener('click', () => {
-                const originalText = originalTranscriptInput.value.trim();
+                const originalText = filteredTranscriptInput.value.trim();
                 if (!originalText) {
                     alert('변환할 대본을 입력해주세요.');
                     return;
                 }
 
-                currentTextChunks = smartSplitAndChunk(originalText); // 전역 변수에 저장
-                segmentedTextsContainer.innerHTML = ''; // 기존 청크 모두 제거
-                noSegmentsMessage.style.display = 'none'; // 메시지 숨김
-                segmentedBlobs = []; // 기존 일괄 다운로드 데이터 초기화
-                downloadAllSegmentsBtn.disabled = true; // 일괄 다운로드 버튼 비활성화
-                convertAllSegmentsBtn.disabled = false; // 일괄 변환 버튼 활성화
-                overallStatus.textContent = ''; // 전체 상태 메시지 초기화
+                currentTextChunks = splitIntoLineChunks(originalText);
+                segmentedTextsContainer.innerHTML = '';
+                noSegmentsMessage.style.display = 'none';
+                segmentedBlobs = [];
+                downloadAllSegmentsBtn.disabled = true;
+                convertAllSegmentsBtn.disabled = false;
+                overallStatus.textContent = '';
 
 
                 if (currentTextChunks.length === 0) {
@@ -1140,7 +1244,6 @@
                     segmentedTextsContainer.appendChild(segmentDiv);
                 });
 
-                // 동적으로 생성된 버튼에 이벤트 리스너 추가
                 document.querySelectorAll('.convert-segment-btn').forEach(button => {
                     button.addEventListener('click', async (event) => {
                         const index = event.target.dataset.index;
@@ -1149,21 +1252,22 @@
                         const segmentAudioPlayer = document.getElementById(`segment-audio-player-${index}`);
                         const segmentDownloadBtn = document.querySelector(`.download-segment-btn[data-index="${index}"]`);
 
-                        // 오디오 플레이어 보이기
                         segmentAudioPlayer.style.display = 'block';
 
-                        // 개별 변환은 segmentedBlobs에 직접 추가하지 않음 (일괄 변환 시에만 관리)
-                        // commonConvertAndDownload의 반환값을 사용하지 않음
+                        // 파일명 형식 변경: "01.mp3", "12.mp3"
+                        const filename = `${String(parseInt(index) + 1).padStart(2, '0')}`;
                         await commonConvertAndDownload(
                             chunkText,
                             'text',
                             segmentStatus,
                             segmentAudioPlayer,
                             segmentDownloadBtn,
-                            `변환된_분할된대본_${index + 1}` // 파일명 접두사 변경
+                            filename,
+                            true // isSegment 플래그를 true로 설정
                         );
                     });
                 });
+                
             });
 
             // --- 모든 분할 대본 음성 변환 버튼 이벤트 ---
@@ -1181,7 +1285,7 @@
 
                 convertAllSegmentsBtn.disabled = true;
                 downloadAllSegmentsBtn.disabled = true;
-                segmentedBlobs = []; // 새로운 일괄 변환 시작 시 기존 데이터 초기화
+                segmentedBlobs = [];
 
                 overallStatus.textContent = `모든 분할 대본 음성 변환 시작 (총 ${currentTextChunks.length}개)...`;
                 overallStatus.style.color = 'orange';
@@ -1192,35 +1296,34 @@
                     const segmentAudioPlayer = document.getElementById(`segment-audio-player-${i}`);
                     const segmentDownloadBtn = document.querySelector(`.download-segment-btn[data-index="${i}"]`);
 
-                    segmentAudioPlayer.style.display = 'block'; // 플레이어 표시
+                    segmentAudioPlayer.style.display = 'block';
 
                     overallStatus.textContent = `변환 중: ${i + 1} / ${currentTextChunks.length}`;
                     
+                    const filename = `${String(i + 1).padStart(2, '0')}`;
                     const result = await commonConvertAndDownload(
                         chunkText,
                         'text',
                         segmentStatus,
                         segmentAudioPlayer,
                         segmentDownloadBtn,
-                        `변환된_분할된대본_${String(i + 1).padStart(3, '0')}` // 파일명 순서대로 정렬하기 위해 패딩 추가
+                        filename,
+                        true
                     );
 
-                    // 일괄 다운로드를 위해 Blob을 저장 (성공한 경우에만)
-                    if (result.success && result.audioBlob) { // audioBlob을 확인
-                         const now = new Date();
-                         const fileName = `변환된_분할된대본_${String(i + 1).padStart(3, '0')}_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}.mp3`;
-                         segmentedBlobs.push({ blob: result.audioBlob, filename: fileName }); // audioBlob 직접 저장
+                    if (result.success && result.audioBlob) {
+                         segmentedBlobs.push({ blob: result.audioBlob, filename: result.filename });
                     } else if (result.error) {
                          overallStatus.textContent = `오류 발생: ${result.error} (세그먼트 ${i + 1})`;
                          overallStatus.style.color = 'red';
-                         break; // 오류 발생 시 중단
+                         break;
                     }
                 }
 
-                if (segmentedBlobs.length === currentTextChunks.length) { // 모든 세그먼트가 성공적으로 변환되었는지 확인
+                if (segmentedBlobs.length === currentTextChunks.length) {
                     overallStatus.textContent = '모든 변환 완료!';
                     overallStatus.style.color = 'green';
-                    downloadAllSegmentsBtn.disabled = false; // 모든 변환 완료 후 일괄 다운로드 버튼 활성화
+                    downloadAllSegmentsBtn.disabled = false;
                 } else {
                      overallStatus.textContent = '일부 변환에 실패했습니다. 실패한 세그먼트를 확인하세요.';
                      overallStatus.style.color = 'red';
@@ -1228,38 +1331,35 @@
             });
 
 
-            // --- 모든 MP3 일괄 다운로드 버튼 이벤트 ---
-            downloadAllSegmentsBtn.addEventListener('click', () => {
+            // --- 모든 MP3 일괄 다운로드 버튼 이벤트 (ZIP 파일 압축) ---
+            downloadAllSegmentsBtn.addEventListener('click', async () => {
                 if (segmentedBlobs.length === 0) {
                     alert('다운로드할 MP3 파일이 없습니다. 먼저 모든 대본을 음성 변환해주세요.');
                     return;
                 }
 
-                overallStatus.textContent = '모든 MP3 다운로드 시작...';
+                overallStatus.textContent = '모든 MP3를 ZIP 파일로 압축 중...';
                 overallStatus.style.color = 'blue';
 
-                segmentedBlobs.forEach((item, index) => {
-                    setTimeout(() => {
-                        console.log(`Attempting to createObjectURL for segment ${index}, item.blob:`, item.blob); // 추가된 로그
-                        const url = URL.createObjectURL(item.blob); 
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = item.filename;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url); // 메모리 해제
-
-                        if (index === segmentedBlobs.length - 1) {
-                            overallStatus.textContent = '모든 MP3 다운로드 완료!';
-                            overallStatus.style.color = 'green';
-                        }
-                    }, index * 100); // 0.1초 간격으로 다운로드 (브라우저가 과부하되지 않도록)
+                const zip = new JSZip();
+                segmentedBlobs.forEach(item => {
+                    zip.file(item.filename, item.blob);
                 });
-            });
 
-            // 초기 로드 시 기록 로드 (히스토리 탭이 기본 active가 아닐 수 있으므로 DOMContentLoaded 시점에는 로드하지 않음)
-            // loadHistory(); // 탭 활성화 시에만 로드하도록 변경
+                try {
+                    const zipBlob = await zip.generateAsync({ type: "blob" });
+                    const now = new Date();
+                    const zipFilename = `TTS_MP3s_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.zip`;
+                    saveAs(zipBlob, zipFilename);
+                    
+                    overallStatus.textContent = 'ZIP 파일 다운로드 완료!';
+                    overallStatus.style.color = 'green';
+                } catch (error) {
+                    console.error('Error creating or downloading ZIP:', error);
+                    overallStatus.textContent = `ZIP 파일 생성/다운로드 중 오류 발생: ${error.message}`;
+                    overallStatus.style.color = 'red';
+                }
+            });
         });
     </script>
 </body>
