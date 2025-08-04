@@ -714,7 +714,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearHistoryBtn = document.getElementById('clear-history-btn');
     const maxHistoryInput = document.getElementById('max-history-input');
     const noHistoryMessage = document.getElementById('no-history-message');
+const rateSlider = document.getElementById('rate-slider');
+    const rateValue = document.getElementById('rate-value');
+    const pitchSlider = document.getElementById('pitch-slider');
+    const pitchValue = document.getElementById('pitch-value');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeValue = document.getElementById('volume-value');
 
+    rateValue.textContent = rateSlider.value;
+    pitchValue.textContent = pitchSlider.value;
+    volumeValue.textContent = volumeSlider.value;
+
+    rateSlider.addEventListener('input', function() {
+        rateValue.textContent = rateSlider.value;
+    });
+    pitchSlider.addEventListener('input', function() {
+        pitchValue.textContent = pitchSlider.value;
+    });
+    volumeSlider.addEventListener('input', function() {
+        volumeValue.textContent = volumeSlider.value;
+    });
+	
     let maxHistoryCount = parseInt(maxHistoryInput.value);
 
     function saveHistoryIndexedDB(item) {
